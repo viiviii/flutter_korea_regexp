@@ -49,14 +49,16 @@ String assemble(List<String> arr) {
   return arr.join('');
 }
 
-class _Group {
+class Group {
   List<String> initials = [];
   final String? medial;
   List<String> finales = [];
 
-  _Group.empty() : medial = null;
+  Group.empty() : medial = null;
 
-  _Group.fromMedial(this.medial);
+  Group.fromMedial(this.medial);
+
+  Group.of(this.initials, this.medial, this.finales);
 
   @override
   String toString() => '$runtimeType($initials, $medial, $finales)';
@@ -101,12 +103,12 @@ List<String> mixedConsonantLetters(List<String> inputs) {
 bool isMedial(String text) => MEDIALS.contains(text);
 
 /// 모음으로 시작하는 그룹들을 만든다.
-List<_Group> makeGroupsUsingVowelLetters(List<String> chars) {
-  _Group cursor = _Group.empty();
+List<Group> makeGroupsUsingVowelLetters(List<String> chars) {
+  Group cursor = Group.empty();
   final items = [cursor];
   chars.forEach((char) {
     if (isMedial(char)) {
-      cursor = _Group.fromMedial(char);
+      cursor = Group.fromMedial(char);
       items.add(cursor);
     } else {
       cursor.finales.add(char);
@@ -115,8 +117,8 @@ List<_Group> makeGroupsUsingVowelLetters(List<String> chars) {
   return items;
 }
 
-List<_Group> mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(
-    List<_Group> inputs) {
+List<Group> mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(
+    List<Group> inputs) {
   final items = List.of(inputs);
   items.forEachWithIndex((curr, i, arr) {
     if (i > 0) {
@@ -139,7 +141,7 @@ List<_Group> mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(
 
 /// TODO(viiviii): 나중에 mixedConsonantLetters()와 쌍으로 맞출 수 있을까?
 /// 종성에서 인접한 자음을 하나의 복합 종성으로 합친다.
-List<_Group> mixedFinales(List<_Group> inputs) {
+List<Group> mixedFinales(List<Group> inputs) {
   final items = List.of(inputs);
   items.forEachWithIndex((curr, i, arr) {
     if (curr.finales.length > 2 ||
@@ -157,7 +159,7 @@ List<_Group> mixedFinales(List<_Group> inputs) {
 }
 
 /// 각 글자에 해당하는 블록 단위로 나눈 후 조합한다.
-String groupsJoining(List<_Group> items) {
+String groupsJoining(List<Group> items) {
   final List<List<String>> groups = [];
   items.forEach((e) {
     final initials = e.initials;

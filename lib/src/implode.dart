@@ -5,81 +5,18 @@ final complexDict = MIXED.map((k, v) => MapEntry(v.join(''), k));
 
 // TODO(viiviii): 파라미터로 string[]이 오는 경우
 String implode(String input) {
-  final chars = <String>[];
-
   /// 인접한 모음을 하나의 복합 모음으로 합친다.
-  input.split('').forEachWithIndex((e, i, arr) {
-    if (chars.length > 0 &&
-        MEDIALS.indexOf(arr[i - 1]) != -1 &&
-        MEDIALS.indexOf(e) != -1 &&
-        complexDict['${arr[i - 1]}$e'] != null) {
-      chars[chars.length - 1] = complexDict['${arr[i - 1]}$e']!;
-    } else {
-      chars.add(e);
-    }
-  });
+  final chars = mixedConsonantLetters(input.split(''));
 
-  _Group cursor = _Group.empty();
-  final items = [cursor];
-
-  /// 모음으로 시작하는 그룹들을 만든다. (grouped로 넘어온 항목들은 유지)
-  chars.forEach((e) {
-    if (MEDIALS.indexOf(e) != -1) {
-      cursor = _Group.fromMedial(e);
-      items.add(cursor);
-    } else {
-      cursor.finales.add(e);
-    }
-  });
+  /// 모음으로 시작하는 그룹들을 만든다.
+  final items = makeGroupsUsingVowelLetters(chars);
 
   /// 각 그룹을 순회하면서 복합자음을 정리하고, 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
-  items.forEachWithIndex((curr, i, arr) {
-    if (i > 0) {
-      final prev = arr[i - 1];
-      if (prev.medial == null || prev.finales.length == 1) {
-        curr.initials = prev.finales;
-        prev.finales = [];
-      } else {
-        final finale = prev.finales.isNotEmpty ? prev.finales.first : null;
-        final initials = prev.finales.skip(1).toList();
-        curr.initials = initials;
-        prev.finales = finale != null ? [finale] : [];
-      }
-      if (curr.finales.length > 2 ||
-          (i == items.length - 1 && curr.finales.length > 1)) {
-        final a = curr.finales.first;
-        final b = curr.finales.elementAt(1);
-        final rest = curr.finales.skip(2);
-        final complex = complexDict['$a$b'];
-        if (complex != null) {
-          curr.finales = [complex, ...rest];
-        }
-      }
-    }
-  });
+  final groups =
+      mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(items);
 
   /// 각 글자에 해당하는 블록 단위로 나눈 후 조합한다.
-  final List<List<String>> groups = [];
-  items.forEach((e) {
-    final initials = e.initials;
-    final medial = e.medial;
-    final finales = e.finales;
-
-    final List<String> pre = List.of(initials);
-    final String? initial = pre.isNotEmpty ? pre.removeLast() : null;
-    String? finale = finales.isNotEmpty ? finales.first : null;
-    List<String?> post = finales.skip(1).toList();
-
-    if (finale == null || FINALES.indexOf(finale) == -1) {
-      post = [finale, ...post];
-      finale = '';
-    }
-    pre.whereNotNull().forEach((e) => groups.add([e]));
-    groups.add([initial, medial, finale].whereNotNull().toList());
-    post.whereNotNull().forEach((e) => groups.add([e]));
-  });
-
-  return groups.map(assemble).join('');
+  return groupsJoining(groups);
 }
 
 String assemble(List<String> arr) {
@@ -133,4 +70,92 @@ extension _<E> on List<E> {
       action(element, index, array);
     }
   }
+}
+
+/// 인접한 모음을 하나의 복합 모음으로 합친다.
+List<String> mixedConsonantLetters(List<String> inputs) {
+  final chars = <String>[];
+  inputs.forEachWithIndex((e, i, arr) {
+    if (chars.length > 0 &&
+        MEDIALS.indexOf(arr[i - 1]) != -1 &&
+        MEDIALS.indexOf(e) != -1 &&
+        complexDict['${arr[i - 1]}$e'] != null) {
+      chars[chars.length - 1] = complexDict['${arr[i - 1]}$e']!;
+    } else {
+      chars.add(e);
+    }
+  });
+  return chars;
+}
+
+/// 모음으로 시작하는 그룹들을 만든다.
+List<_Group> makeGroupsUsingVowelLetters(List<String> chars) {
+  _Group cursor = _Group.empty();
+  final items = [cursor];
+
+  chars.forEach((e) {
+    if (MEDIALS.indexOf(e) != -1) {
+      cursor = _Group.fromMedial(e);
+      items.add(cursor);
+    } else {
+      cursor.finales.add(e);
+    }
+  });
+
+  return items;
+}
+
+List<_Group> mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(
+    List<_Group> inputs) {
+  final items = List.of(inputs);
+  items.forEachWithIndex((curr, i, arr) {
+    if (i > 0) {
+      final prev = arr[i - 1];
+      if (prev.medial == null || prev.finales.length == 1) {
+        curr.initials = prev.finales;
+        prev.finales = [];
+      } else {
+        final finale = prev.finales.isNotEmpty ? prev.finales.first : null;
+        final initials = prev.finales.skip(1).toList();
+        curr.initials = initials;
+        prev.finales = finale != null ? [finale] : [];
+      }
+      if (curr.finales.length > 2 ||
+          (i == items.length - 1 && curr.finales.length > 1)) {
+        final a = curr.finales.first;
+        final b = curr.finales.elementAt(1);
+        final rest = curr.finales.skip(2);
+        final complex = complexDict['$a$b'];
+        if (complex != null) {
+          curr.finales = [complex, ...rest];
+        }
+      }
+    }
+  });
+  return items;
+}
+
+/// 각 글자에 해당하는 블록 단위로 나눈 후 조합한다.
+String groupsJoining(List<_Group> items) {
+  final List<List<String>> groups = [];
+  items.forEach((e) {
+    final initials = e.initials;
+    final medial = e.medial;
+    final finales = e.finales;
+
+    final List<String> pre = List.of(initials);
+    final String? initial = pre.isNotEmpty ? pre.removeLast() : null;
+    String? finale = finales.isNotEmpty ? finales.first : null;
+    List<String?> post = finales.skip(1).toList();
+
+    if (finale == null || FINALES.indexOf(finale) == -1) {
+      post = [finale, ...post];
+      finale = '';
+    }
+    pre.whereNotNull().forEach((e) => groups.add([e]));
+    groups.add([initial, medial, finale].whereNotNull().toList());
+    post.whereNotNull().forEach((e) => groups.add([e]));
+  });
+
+  return groups.map(assemble).join('');
 }

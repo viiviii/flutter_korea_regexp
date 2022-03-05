@@ -49,6 +49,7 @@ String assemble(List<String> arr) {
   return arr.join('');
 }
 
+// TODO(viiviii): immutable하게 변경할 수 있을까?
 class Group {
   List<String> initials = [];
   final String? medial;
@@ -59,6 +60,16 @@ class Group {
   Group.fromMedial(this.medial);
 
   Group.of(this.initials, this.medial, this.finales);
+
+  void mixFinalesTheFirstTwoLetters() {
+    final a = this.finales[0];
+    final b = this.finales[1];
+    final mix = complexDict['$a$b'];
+    if (mix != null) {
+      final rest = this.finales.skip(2);
+      this.finales = [mix, ...rest];
+    }
+  }
 
   @override
   String toString() => '$runtimeType($initials, $medial, $finales)';
@@ -140,19 +151,14 @@ List<Group> mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(
 }
 
 /// TODO(viiviii): 나중에 mixedConsonantLetters()와 쌍으로 맞출 수 있을까?
+/// TODO(viiviii): 왜 종성이 세 글자이거나 마지막 글자의 종성일 때만 합칠까? 그냥 2개 이상이면 합치면 안되나?
 /// 종성에서 인접한 자음을 하나의 복합 종성으로 합친다.
 List<Group> mixedFinales(List<Group> inputs) {
   final items = List.of(inputs);
-  items.forEachWithIndex((curr, i, arr) {
+  items.forEachWithIndex((curr, i, _) {
     if (curr.finales.length > 2 ||
         (i == items.length - 1 && curr.finales.length > 1)) {
-      final a = curr.finales.first;
-      final b = curr.finales.elementAt(1);
-      final rest = curr.finales.skip(2);
-      final complex = complexDict['$a$b'];
-      if (complex != null) {
-        curr.finales = [complex, ...rest];
-      }
+      curr.mixFinalesTheFirstTwoLetters();
     }
   });
   return items;

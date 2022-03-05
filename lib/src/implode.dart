@@ -3,7 +3,7 @@ import 'package:korea_regexp/src/constant.dart';
 
 final complexDict = MIXED.map((k, v) => MapEntry(v.join(''), k));
 
-// TODO(viiviii): 파라미터로 string[]이 오는 경우
+// TODO(viiviii): 변수명
 String implode(String input) {
   /// 인접한 모음을 하나의 복합 모음으로 합친다.
   final chars = mixedConsonantLetters(input.split(''));
@@ -11,9 +11,11 @@ String implode(String input) {
   /// 모음으로 시작하는 그룹들을 만든다.
   final items = makeGroupsUsingVowelLetters(chars);
 
-  /// 각 그룹을 순회하면서 복합자음을 정리하고, 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
-  final groups =
-      mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(items);
+  /// 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
+  final items2 = replaceTheRemainingFinalesToInitials(items);
+
+  /// 각 그룹을 순회하면서 복합자음을 정리한다.
+  final groups = mixedFinales(items2);
 
   /// 각 글자에 해당하는 블록 단위로 나눈 후 조합한다.
   return groupsJoining(groups);
@@ -61,6 +63,7 @@ class Group {
 
   Group.of(this.initials, this.medial, this.finales);
 
+  /// 종성에서 인접한 자음을 하나의 복합 종성으로 합친다.
   void mixFinalesTheFirstTwoLetters() {
     final a = this.finales[0];
     final b = this.finales[1];
@@ -128,9 +131,9 @@ List<Group> makeGroupsUsingVowelLetters(List<String> chars) {
   return items;
 }
 
-List<Group> mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(
-    List<Group> inputs) {
-  final items = List.of(inputs);
+/// 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
+List<Group> replaceTheRemainingFinalesToInitials(List<Group> groups) {
+  final items = List.of(groups);
   items.forEachWithIndex((curr, i, arr) {
     if (i > 0) {
       final prev = arr[i - 1];
@@ -145,14 +148,12 @@ List<Group> mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(
       }
     }
   });
-
-  final result = mixedFinales(items);
-  return result;
+  return items;
 }
 
 /// TODO(viiviii): 나중에 mixedConsonantLetters()와 쌍으로 맞출 수 있을까?
 /// TODO(viiviii): 왜 종성이 세 글자이거나 마지막 글자의 종성일 때만 합칠까? 그냥 2개 이상이면 합치면 안되나?
-/// 종성에서 인접한 자음을 하나의 복합 종성으로 합친다.
+/// 각 그룹을 순회하면서 복합자음을 정리한다.
 List<Group> mixedFinales(List<Group> inputs) {
   final items = List.of(inputs);
   items.forEachWithIndex((curr, i, _) {

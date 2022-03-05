@@ -5,6 +5,7 @@ main() {
   group('implode', () {
     [
       ['ㄲㅏㄱㄷㅜㄱㅣ', '깍두기'],
+      ['ㄱㄱㅏㄱㄷㅜㄱㅣ', 'ㄱ각두기'],
       ['ㅂㅜㄹㄷㅏㄹㄱ', '불닭'],
       ['ㅇㅓㅂㅔㄴㅈㅕㅅㅡ ㅇㅐㄴㄷㅡㄱㅔㅇㅣㅁ', '어벤져스 앤드게임'],
     ].forEach((e) {
@@ -137,5 +138,20 @@ main() {
 
     expect(previousActual.finales, [previousFinales.first]);
     expect(currentActual.initials, [previousFinales.last]);
+  });
+
+  group('groupsJoining', () {
+    test('ㄱㄱㅗㅊ -> ㄱ곷', () {
+      final group = Group.of(['ㄱ', 'ㄱ'], 'ㅗ', ['ㅊ']);
+      expect(groupsJoining([group]), 'ㄱ곷');
+    });
+    test('ㄲㅗㅊ -> 꽃', () {
+      final group = Group.of(['ㄲ'], 'ㅗ', ['ㅊ']);
+      expect(groupsJoining([group]), '꽃');
+    });
+    test('종성 리스트의 첫번째 값이 유효한 종성이 아닌 경우', () {
+      final group = Group.of(['ㄲ'], 'ㅗ', ['sㅊ']);
+      expect(groupsJoining([group]), '꼬sㅊ');
+    });
   });
 }

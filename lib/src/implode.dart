@@ -70,23 +70,35 @@ extension _<E> on List<E> {
       action(element, index, array);
     }
   }
+
+  void forEachFromNext(void f(E previousValue, E element)) {
+    if (this.isEmpty) return;
+    var previousValue = this.first;
+    this.skip(1).forEach((element) {
+      f(previousValue, element);
+      previousValue = element;
+    });
+  }
 }
 
 /// 인접한 모음을 하나의 복합 모음으로 합친다.
+// TODO(viiviii): MIXED 상수를 자음, 모음 분리해서 바로 찾는게 좋지 않을까?
 List<String> mixedConsonantLetters(List<String> inputs) {
-  final chars = <String>[];
-  inputs.forEachWithIndex((e, i, arr) {
-    if (chars.length > 0 &&
-        MEDIALS.indexOf(arr[i - 1]) != -1 &&
-        MEDIALS.indexOf(e) != -1 &&
-        complexDict['${arr[i - 1]}$e'] != null) {
-      chars[chars.length - 1] = complexDict['${arr[i - 1]}$e']!;
+  final chars = [inputs.first];
+  inputs.forEachFromNext((previous, current) {
+    if (isMedial(previous) &&
+        isMedial(current) &&
+        complexDict['$previous$current'] != null) {
+      chars.last = complexDict['$previous$current']!;
     } else {
-      chars.add(e);
+      chars.add(current);
     }
   });
   return chars;
 }
+
+/// 해당 글자가 중성인지
+bool isMedial(String text) => MEDIALS.contains(text);
 
 /// 모음으로 시작하는 그룹들을 만든다.
 List<_Group> makeGroupsUsingVowelLetters(List<String> chars) {

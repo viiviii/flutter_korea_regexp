@@ -15,10 +15,12 @@ String implode(String input) {
   final items2 = replaceTheRemainingFinalesToInitials(items);
 
   /// 각 그룹을 순회하면서 종성의 복합자음을 정리한다.
-  final groups = mixedFinales(items2);
+  final items3 = mixedFinales(items2);
 
-  /// 각 글자에 해당하는 블록 단위로 나눈 후 조합한다.
-  return groupsJoining(groups);
+  /// 각 글자에 해당하는 블록 단위로 나눈다.
+  final List<List<String>> items4 = groupsJoining(items3);
+
+  return items4.map(assemble).join('');
 }
 
 String assemble(List<String> arr) {
@@ -114,7 +116,10 @@ List<String> mixedConsonantLetters(List<String> inputs) {
 }
 
 /// 해당 글자가 중성인지
-bool isMedial(String text) => MEDIALS.contains(text);
+bool isMedial(String? text) => MEDIALS.contains(text);
+
+/// 해당 글자가 종성인지
+bool isFinale(String? text) => FINALES.contains(text);
 
 /// 모음으로 시작하는 그룹들을 만든다.
 List<Group> makeGroupsUsingVowelLetters(List<String> chars) {
@@ -162,27 +167,22 @@ List<Group> mixedFinales(List<Group> inputs) {
   return items;
 }
 
-/// 각 글자에 해당하는 블록 단위로 나눈 후 조합한다.
-String groupsJoining(List<Group> items) {
-  final List<List<String>> groups = [];
-  items.forEach((e) {
-    final initials = e.initials;
-    final medial = e.medial;
-    final finales = e.finales;
-
-    final List<String> pre = List.of(initials);
+/// 각 글자에 해당하는 블록 단위로 나눈다.
+List<List<String>> groupsJoining(List<Group> groups) {
+  final List<List<String>> result = [];
+  groups.forEach((e) {
+    final List<String> pre = List.of(e.initials);
     final String? initial = pre.isNotEmpty ? pre.removeLast() : null;
-    String? finale = finales.isNotEmpty ? finales.first : null;
-    List<String?> post = finales.skip(1).toList();
-
-    if (finale == null || FINALES.indexOf(finale) == -1) {
+    final medial = e.medial;
+    String? finale = e.finales.isNotEmpty ? e.finales.first : null;
+    List<String?> post = e.finales.skip(1).toList();
+    if (!isFinale(finale)) {
       post = [finale, ...post];
       finale = '';
     }
-    pre.whereNotNull().forEach((e) => groups.add([e]));
-    groups.add([initial, medial, finale].whereNotNull().toList());
-    post.whereNotNull().forEach((e) => groups.add([e]));
+    pre.whereNotNull().forEach((e) => result.add([e]));
+    result.add([initial, medial, finale].whereNotNull().toList());
+    post.whereNotNull().forEach((e) => result.add([e]));
   });
-
-  return groups.map(assemble).join('');
+  return result;
 }

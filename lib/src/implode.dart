@@ -104,16 +104,14 @@ bool isMedial(String text) => MEDIALS.contains(text);
 List<_Group> makeGroupsUsingVowelLetters(List<String> chars) {
   _Group cursor = _Group.empty();
   final items = [cursor];
-
-  chars.forEach((e) {
-    if (MEDIALS.indexOf(e) != -1) {
-      cursor = _Group.fromMedial(e);
+  chars.forEach((char) {
+    if (isMedial(char)) {
+      cursor = _Group.fromMedial(char);
       items.add(cursor);
     } else {
-      cursor.finales.add(e);
+      cursor.finales.add(char);
     }
   });
-
   return items;
 }
 

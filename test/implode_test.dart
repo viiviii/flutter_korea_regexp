@@ -25,4 +25,24 @@ main() {
       expect(mixedConsonantLetters(['ㅇ', 'ㅣ', 'ㅜ']), ['ㅇ', 'ㅣ', 'ㅜ']);
     });
   });
+
+  // TODO(viiviii): 최선인가?
+  group('makeGroupsUsingVowelLetters', () {
+    test('모음을 기준으로 Group 리스트를 만든다', () {
+      final groups =
+          makeGroupsUsingVowelLetters(['ㅂ', 'ㅜ', 'ㄹ', 'ㄷ', 'ㅏ', 'ㄱ']);
+      final group1 = groups[0];
+      expect(group1.initials, []);
+      expect(group1.medial, null);
+      expect(group1.finales, ['ㅂ']);
+      final group2 = groups[1];
+      expect(group2.initials, []);
+      expect(group2.medial, 'ㅜ');
+      expect(group2.finales, ['ㄹ', 'ㄷ']);
+      final group3 = groups[2];
+      expect(group3.initials, []);
+      expect(group3.medial, 'ㅏ');
+      expect(group3.finales, ['ㄱ']);
+    });
+  });
 }

@@ -15,4 +15,14 @@ main() {
       });
     });
   });
+
+  group('mixedConsonantLetters', () {
+    test('인접한 모음을 복합 모음으로 합친다', () {
+      expect(mixedConsonantLetters(['ㅇ', 'ㅜ', 'ㅓ', 'ㄴ']), ['ㅇ', 'ㅝ', 'ㄴ']);
+    });
+    test('합칠 수 있는 복합 모음이 없는 경우 변경 사항이 없다', () {
+      expect(mixedConsonantLetters(['ㅇ', 'ㅣ', 'ㅇ']), ['ㅇ', 'ㅣ', 'ㅇ']);
+      expect(mixedConsonantLetters(['ㅇ', 'ㅣ', 'ㅜ']), ['ㅇ', 'ㅣ', 'ㅜ']);
+    });
+  });
 }

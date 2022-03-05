@@ -27,7 +27,7 @@ main() {
   });
 
   group('mixedFinales', () {
-    test('종성에서 인접한 자음을 하나의 복합 종성으로 합친다', () {
+    test('각 그룹을 순회하면서 종성의 복합자음을 정리한다', () {
       //given
       final initials = ['ㅇ'];
       final medial = 'ㅡ';
@@ -63,29 +63,79 @@ main() {
     });
   });
 
-  group('mixedVowelLettersAndReplaceTheRemainingFinalesToInitials', () {
-    // [Group([], null, [ㄱ, ㄱ]), Group([], ㅏ, [ㄱ, ㄷ]), Group([], ㅜ, [ㄱ]), Group([], ㅣ, [])]
-    final before =
-        makeGroupsUsingVowelLetters(['ㄱ', 'ㄱ', 'ㅏ', 'ㄱ', 'ㄷ', 'ㅜ', 'ㄱ', 'ㅣ']);
-    test('각 그룹을 순회하면서 복합자음을 정리하고, 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.', () {
-      final groups =
-          mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(before);
-      final group1 = groups[0];
-      expect(group1.initials, []);
-      expect(group1.medial, null);
-      expect(group1.finales, []);
-      final group2 = groups[1];
-      expect(group2.initials, ['ㄱ', 'ㄱ']); // TODO(viiivii) - 이거 왜 정리 안됨?(ㄲ)
-      expect(group2.medial, 'ㅏ');
-      expect(group2.finales, ['ㄱ']);
-      final group3 = groups[2];
-      expect(group3.initials, ['ㄷ']);
-      expect(group3.medial, 'ㅜ');
-      expect(group3.finales, []);
-      final group4 = groups[3];
-      expect(group4.initials, ['ㄱ']);
-      expect(group4.medial, 'ㅣ');
-      expect(group4.finales, []);
+  group('replaceTheRemainingFinalesToInitials', () {
+    test('앞 그룹에 중성이 없는 경우', () {
+      //given
+      const previousMedial = null;
+      const previousFinales = ['ㄱ', 'ㄱ'];
+
+      final previous = Group.of([], previousMedial, previousFinales);
+      final current = Group.of([], 'ㅏ', []);
+
+      //when
+      final groups = replaceTheRemainingFinalesToInitials([previous, current]);
+
+      //then
+      final previousActual = groups.first;
+      final currentActual = groups.last;
+      expect(previousActual.finales, []);
+      expect(currentActual.initials, previousFinales);
     });
+
+    test('앞 그룹에 중성이 있고, 종성이 없는 경우', () {
+      //given
+      const previousMedial = 'ㅗ';
+      const previousFinales = <String>[];
+
+      final previous = Group.of([], previousMedial, previousFinales);
+      final current = Group.of([], 'ㅏ', []);
+
+      //when
+      final groups = replaceTheRemainingFinalesToInitials([previous, current]);
+
+      //then
+      final previousActual = groups.first;
+      final currentActual = groups.last;
+      expect(previousActual.finales, []);
+      expect(currentActual.initials, previousFinales);
+    });
+  });
+
+  test('앞 그룹에 중성이 있고, 종성이 1개인 경우', () {
+    //given
+    const previousMedial = 'ㅗ';
+    const previousFinales = ['ㄱ'];
+
+    final previous = Group.of([], previousMedial, previousFinales);
+    final current = Group.of([], 'ㅏ', []);
+
+    //when
+    final groups = replaceTheRemainingFinalesToInitials([previous, current]);
+
+    //then
+    final previousActual = groups.first;
+    final currentActual = groups.last;
+    expect(previousActual.finales, []);
+    expect(currentActual.initials, previousFinales);
+  });
+
+  // TODO(viiviii): 이 케이스를 제외하고는 모두 같다 -> 해당 메서드 분기 수정
+  test('앞 그룹에 중성이 있고, 종성이 여러개인 경우', () {
+    //given
+    const previousMedial = 'ㅗ';
+    const previousFinales = ['ㄱ', 'ㄱ'];
+
+    final previous = Group.of([], previousMedial, previousFinales);
+    final current = Group.of([], 'ㅏ', []);
+
+    //when
+    final groups = replaceTheRemainingFinalesToInitials([previous, current]);
+
+    //then
+    final previousActual = groups.first;
+    final currentActual = groups.last;
+
+    expect(previousActual.finales, [previousFinales.first]);
+    expect(currentActual.initials, [previousFinales.last]);
   });
 }

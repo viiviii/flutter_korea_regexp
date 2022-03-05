@@ -26,7 +26,24 @@ main() {
     });
   });
 
-  // TODO(viiviii): 최선인가?
+  group('mixedFinales', () {
+    test('종성에서 인접한 자음을 하나의 복합 종성으로 합친다', () {
+      //given
+      final initials = ['ㅇ'];
+      final medial = 'ㅡ';
+      final finales = ['ㅅ', 'ㅅ'];
+
+      //when
+      final actual = mixedFinales([Group.of(initials, medial, finales)]).first;
+
+      //then
+      expect(actual.initials, initials);
+      expect(actual.medial, medial);
+      expect(actual.finales, ['ㅆ']);
+    });
+  });
+
+  // TODO(viiviii): 이최선인가?
   group('makeGroupsUsingVowelLetters', () {
     test('모음을 기준으로 Group 리스트를 만든다', () {
       final groups =

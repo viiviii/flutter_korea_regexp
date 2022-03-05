@@ -130,15 +130,26 @@ List<_Group> mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(
         curr.initials = initials;
         prev.finales = finale != null ? [finale] : [];
       }
-      if (curr.finales.length > 2 ||
-          (i == items.length - 1 && curr.finales.length > 1)) {
-        final a = curr.finales.first;
-        final b = curr.finales.elementAt(1);
-        final rest = curr.finales.skip(2);
-        final complex = complexDict['$a$b'];
-        if (complex != null) {
-          curr.finales = [complex, ...rest];
-        }
+    }
+  });
+
+  final result = mixedFinales(items);
+  return result;
+}
+
+/// TODO(viiviii): 나중에 mixedConsonantLetters()와 쌍으로 맞출 수 있을까?
+/// 종성에서 인접한 자음을 하나의 복합 종성으로 합친다.
+List<_Group> mixedFinales(List<_Group> inputs) {
+  final items = List.of(inputs);
+  items.forEachWithIndex((curr, i, arr) {
+    if (curr.finales.length > 2 ||
+        (i == items.length - 1 && curr.finales.length > 1)) {
+      final a = curr.finales.first;
+      final b = curr.finales.elementAt(1);
+      final rest = curr.finales.skip(2);
+      final complex = complexDict['$a$b'];
+      if (complex != null) {
+        curr.finales = [complex, ...rest];
       }
     }
   });

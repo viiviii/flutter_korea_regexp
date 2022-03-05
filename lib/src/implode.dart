@@ -134,18 +134,15 @@ List<Group> makeGroupsUsingVowelLetters(List<String> chars) {
 /// 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
 List<Group> replaceTheRemainingFinalesToInitials(List<Group> groups) {
   final items = List.of(groups);
-  items.forEachWithIndex((curr, i, arr) {
-    if (i > 0) {
-      final prev = arr[i - 1];
-      if (prev.medial == null || prev.finales.length == 1) {
-        curr.initials = prev.finales;
-        prev.finales = [];
-      } else {
-        final finale = prev.finales.isNotEmpty ? prev.finales.first : null;
-        final initials = prev.finales.skip(1).toList();
-        curr.initials = initials;
-        prev.finales = finale != null ? [finale] : [];
-      }
+  items.forEachFromNext((prev, curr) {
+    if (prev.medial == null || prev.finales.length == 1) {
+      curr.initials = prev.finales;
+      prev.finales = [];
+    } else {
+      final finale = prev.finales.isNotEmpty ? prev.finales.first : null;
+      final initials = prev.finales.skip(1).toList();
+      curr.initials = initials;
+      prev.finales = finale != null ? [finale] : [];
     }
   });
   return items;

@@ -45,4 +45,30 @@ main() {
       expect(group3.finales, ['ㄱ']);
     });
   });
+
+  group('mixedVowelLettersAndReplaceTheRemainingFinalesToInitials', () {
+    // [Group([], null, [ㄱ, ㄱ]), Group([], ㅏ, [ㄱ, ㄷ]), Group([], ㅜ, [ㄱ]), Group([], ㅣ, [])]
+    final before =
+        makeGroupsUsingVowelLetters(['ㄱ', 'ㄱ', 'ㅏ', 'ㄱ', 'ㄷ', 'ㅜ', 'ㄱ', 'ㅣ']);
+    test('각 그룹을 순회하면서 복합자음을 정리하고, 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.', () {
+      final groups =
+          mixedVowelLettersAndReplaceTheRemainingFinalesToInitials(before);
+      final group1 = groups[0];
+      expect(group1.initials, []);
+      expect(group1.medial, null);
+      expect(group1.finales, []);
+      final group2 = groups[1];
+      expect(group2.initials, ['ㄱ', 'ㄱ']); // TODO(viiivii) - 이거 왜 정리 안됨?(ㄲ)
+      expect(group2.medial, 'ㅏ');
+      expect(group2.finales, ['ㄱ']);
+      final group3 = groups[2];
+      expect(group3.initials, ['ㄷ']);
+      expect(group3.medial, 'ㅜ');
+      expect(group3.finales, []);
+      final group4 = groups[3];
+      expect(group4.initials, ['ㄱ']);
+      expect(group4.medial, 'ㅣ');
+      expect(group4.finales, []);
+    });
+  });
 }

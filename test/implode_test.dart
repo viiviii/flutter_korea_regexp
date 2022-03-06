@@ -141,17 +141,25 @@ main() {
   });
 
   group('groupsJoining', () {
-    test('ㄱㄱㅗㅊ -> ㄱ곷', () {
+    test('[[ㄱ, ㄱ], ㅗ, [ㅊ]]] -> [[ㄱ], [ㄱ, ㅗ, ㅊ]]', () {
       final group = Group.of(['ㄱ', 'ㄱ'], 'ㅗ', ['ㅊ']);
-      expect(groupsJoining([group]), 'ㄱ곷');
+      expect(groupsJoining([group]), [
+        ['ㄱ'],
+        ['ㄱ', 'ㅗ', 'ㅊ']
+      ]);
     });
-    test('ㄲㅗㅊ -> 꽃', () {
+    test('[[ㄲ], ㅗ, [ㅊ]] -> [ㄲ, ㅗ, ㅊ]', () {
       final group = Group.of(['ㄲ'], 'ㅗ', ['ㅊ']);
-      expect(groupsJoining([group]), '꽃');
+      expect(groupsJoining([group]), [
+        ['ㄲ', 'ㅗ', 'ㅊ']
+      ]);
     });
     test('종성 리스트의 첫번째 값이 유효한 종성이 아닌 경우', () {
       final group = Group.of(['ㄲ'], 'ㅗ', ['sㅊ']);
-      expect(groupsJoining([group]), '꼬sㅊ');
+      expect(groupsJoining([group]), [
+        ['ㄲ', 'ㅗ', ''],
+        ['sㅊ']
+      ]);
     });
   });
 }

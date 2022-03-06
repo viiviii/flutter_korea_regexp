@@ -171,15 +171,24 @@ List<Group> mixedFinales(List<Group> inputs) {
 List<List<String>> groupsJoining(List<Group> groups) {
   final List<List<String>> result = [];
   groups.forEach((e) {
-    final List<String> pre = List.of(e.initials);
-    final String initial = pre.isNotEmpty ? pre.removeLast() : '';
-    final String medial = e.medial ?? '';
-    String finale = e.finales.isNotEmpty ? e.finales.first : '';
-    List<String> post = e.finales.skip(1).toList();
-    if (!isFinale(finale)) {
-      post = [finale, ...post];
-      finale = '';
+    final medial = e.medial ?? '';
+
+    List<String> pre = e.initials;
+    List<String> post = e.finales;
+
+    String initial = '';
+    String finale = '';
+
+    if (pre.isNotEmpty) {
+      initial = pre.last;
+      pre = pre.sublist(0, pre.length - 1);
     }
+
+    if (post.isNotEmpty && isFinale(post.first)) {
+      finale = post.first;
+      post = post.skip(1).toList();
+    }
+
     pre.where((e) => e.isNotEmpty).forEach((e) => result.add([e]));
     result.add([initial, medial, finale].where((e) => e.isNotEmpty).toList());
     post.where((e) => e.isNotEmpty).forEach((e) => result.add([e]));

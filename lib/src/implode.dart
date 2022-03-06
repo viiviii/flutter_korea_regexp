@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart' show IterableNullableExtension;
 import 'package:korea_regexp/src/constant.dart';
 
 final complexDict = MIXED.map((k, v) => MapEntry(v.join(''), k));
@@ -25,14 +24,15 @@ String implode(String input) {
 
 String assemble(List<String> arr) {
   final startIndex = arr.indexWhere((e) => MEDIALS.indexOf(e) != -1);
-  final endIndex =
-      startIndex != -1 && MEDIALS.indexOf(arr[startIndex + 1]) != -1
-          ? startIndex + 1
-          : startIndex;
+  final endIndex = startIndex != -1 &&
+          startIndex != arr.length - 1 &&
+          MEDIALS.indexOf(arr[startIndex + 1]) != -1
+      ? startIndex + 1
+      : startIndex;
 
   // TODO(viiviii)
   if (startIndex == -1 || endIndex == -1) {
-    return arr.first;
+    return arr.join('');
   }
 
   String initial = arr.sublist(0, startIndex).join('');
@@ -172,17 +172,17 @@ List<List<String>> groupsJoining(List<Group> groups) {
   final List<List<String>> result = [];
   groups.forEach((e) {
     final List<String> pre = List.of(e.initials);
-    final String? initial = pre.isNotEmpty ? pre.removeLast() : null;
-    final medial = e.medial;
-    String? finale = e.finales.isNotEmpty ? e.finales.first : null;
-    List<String?> post = e.finales.skip(1).toList();
+    final String initial = pre.isNotEmpty ? pre.removeLast() : '';
+    final String medial = e.medial ?? '';
+    String finale = e.finales.isNotEmpty ? e.finales.first : '';
+    List<String> post = e.finales.skip(1).toList();
     if (!isFinale(finale)) {
       post = [finale, ...post];
       finale = '';
     }
-    pre.whereNotNull().forEach((e) => result.add([e]));
-    result.add([initial, medial, finale].whereNotNull().toList());
-    post.whereNotNull().forEach((e) => result.add([e]));
+    pre.where((e) => e.isNotEmpty).forEach((e) => result.add([e]));
+    result.add([initial, medial, finale].where((e) => e.isNotEmpty).toList());
+    post.where((e) => e.isNotEmpty).forEach((e) => result.add([e]));
   });
   return result;
 }

@@ -13,11 +13,8 @@ String implode(String input) {
   /// 각 그룹을 순회하면서 복합자음을 정리하고, 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
   final items2 = mixFinalesAndReplaceTheRemainingFinalesToInitials(items);
 
-  /// 각 그룹을 순회하면서 종성의 복합자음을 정리한다.
-  final items3 = mixedFinales(items2);
-
   /// 각 글자에 해당하는 블록 단위로 나눈다.
-  final List<List<String>> items4 = groupsJoining(items3);
+  final List<List<String>> items4 = groupsJoining(items2);
 
   return items4.map(assemble).join('');
 }
@@ -81,14 +78,6 @@ class Group {
 }
 
 extension _<E> on List<E> {
-  void forEachWithIndex(void action(E element, int index, List<E> array)) {
-    final array = List<E>.unmodifiable(this);
-    for (int index = 0; index < length; index++) {
-      var element = this[index];
-      action(element, index, array);
-    }
-  }
-
   void forEachFromNext(void f(E previousValue, E element)) {
     if (this.isEmpty) return;
     var previousValue = this.first;
@@ -154,20 +143,6 @@ List<Group> mixFinalesAndReplaceTheRemainingFinalesToInitials(
     /// TODO(viiviii): 왜 종성이 세 글자이거나 마지막 글자의 종성일 때만 합칠까? 그냥 2개 이상이면 합치면 안되나?
     if (curr.finales.length > 2 ||
         (curr == items.last && curr.finales.length > 1)) {
-      curr.mixFinalesTheFirstTwoLetters();
-    }
-  });
-  return items;
-}
-
-/// TODO(viiviii): 나중에 mixedConsonantLetters()와 쌍으로 맞출 수 있을까?
-/// TODO(viiviii): 왜 종성이 세 글자이거나 마지막 글자의 종성일 때만 합칠까? 그냥 2개 이상이면 합치면 안되나?
-/// 각 그룹을 순회하면서 종성의 복합자음을 정리한다.
-List<Group> mixedFinales(List<Group> inputs) {
-  final items = List.of(inputs);
-  items.forEachWithIndex((curr, i, _) {
-    if (curr.finales.length > 2 ||
-        (i == items.length - 1 && curr.finales.length > 1)) {
       curr.mixFinalesTheFirstTwoLetters();
     }
   });

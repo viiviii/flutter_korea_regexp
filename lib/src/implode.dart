@@ -10,8 +10,8 @@ String implode(String input) {
   /// 모음으로 시작하는 그룹들을 만든다.
   final items = makeGroupsUsingVowelLetters(chars);
 
-  /// 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
-  final items2 = replaceTheRemainingFinalesToInitials(items);
+  /// 각 그룹을 순회하면서 복합자음을 정리하고, 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
+  final items2 = mixFinalesAndReplaceTheRemainingFinalesToInitials(items);
 
   /// 각 그룹을 순회하면서 종성의 복합자음을 정리한다.
   final items3 = mixedFinales(items2);
@@ -136,8 +136,9 @@ List<Group> makeGroupsUsingVowelLetters(List<String> chars) {
   return items;
 }
 
-/// 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
-List<Group> replaceTheRemainingFinalesToInitials(List<Group> groups) {
+/// 각 그룹을 순회하면서 복합자음을 정리하고, 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
+List<Group> mixFinalesAndReplaceTheRemainingFinalesToInitials(
+    List<Group> groups) {
   final items = List.of(groups);
   items.forEachFromNext((prev, curr) {
     if (prev.medial == null || prev.finales.length == 1) {
@@ -148,6 +149,12 @@ List<Group> replaceTheRemainingFinalesToInitials(List<Group> groups) {
       final initials = prev.finales.skip(1).toList();
       curr.initials = initials;
       prev.finales = finale != null ? [finale] : [];
+    }
+
+    /// TODO(viiviii): 왜 종성이 세 글자이거나 마지막 글자의 종성일 때만 합칠까? 그냥 2개 이상이면 합치면 안되나?
+    if (curr.finales.length > 2 ||
+        (curr == items.last && curr.finales.length > 1)) {
+      curr.mixFinalesTheFirstTwoLetters();
     }
   });
   return items;

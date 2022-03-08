@@ -147,11 +147,11 @@ main() {
         ['ㄲ', 'ㅗ', 'ㅊ']
       ]);
     });
-    test('빈 값인 경우 아무런 값도 추가되지 않는다', () {
+    test('빈 값인 경우 값이 추가되지 않는다', () {
       final group = Group.of([], null, []);
       expect(groupsJoining([group]), [[]]);
     });
-    test('빈 문자열인 경우 아무런 값도 추가되지 않는다', () {
+    test('빈 문자열인 경우 값이 추가되지 않는다', () {
       final group = Group.of([''], '', ['']);
       expect(groupsJoining([group]), [[]]);
     });
@@ -162,14 +162,14 @@ main() {
         ['ㄲ', 'ㅗ', 'ㅊ']
       ]);
     });
-    test('finales 값이 있는 경우, 처음 값은 종성으로 나머지는 post로 분리된다', () {
+    test('finales 값이 있고 첫번째 값이 유효한 종성이면, 첫번째 값은 종성으로 나머지는 post로 분리된다', () {
       final group = Group.of(['ㄲ'], 'ㅗ', ['ㅊ', 'ㅇ']);
       expect(groupsJoining([group]), [
         ['ㄲ', 'ㅗ', 'ㅊ'],
         ['ㅇ']
       ]);
     });
-    test('종성 리스트의 첫번째 값이 유효한 종성이 아닌 경우, post로 분리된다', () {
+    test('finales 값이 있고 첫번째 값이 유효한 종성이 아니면, 모두 post로 분리된다', () {
       final group = Group.of(['ㄲ'], 'ㅗ', ['sㅊ']);
       expect(groupsJoining([group]), [
         ['ㄲ', 'ㅗ'],

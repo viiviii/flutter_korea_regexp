@@ -5,7 +5,7 @@ main() {
   group('implode', () {
     [
       ['ㄲㅏㄱㄷㅜㄱㅣ', '깍두기'],
-      ['ㄱㄱㅏㄱㄷㅜㄱㅣ', 'ㄱ각두기'],
+      ['ㄱㄱㅏㄱㄷㅜㄱㅣ', 'ㄱ각두기'], // TODO(viiviii): 초성 ㄱㄱ는 안합치고 종성 ㄱㄱ은 합쳐짐
       ['ㄲㅏㄱㄱㄷㅜㄱㅣ', '깎두기'],
       ['ㅂㅜㄹㄷㅏㄹㄱ', '불닭'],
       ['ㅂㅜㄹㄷㅏㄹㄱㅇㅡㄴ', '불닭은'],
@@ -29,20 +29,21 @@ main() {
     });
   });
 
-  group('mixedFinales', () {
-    test('각 그룹을 순회하면서 종성의 복합자음을 정리한다', () {
+  group('mixFinalesTheFirstTwoLetters', () {
+    test('종성에서 인접한 자음을 하나의 복합 종성으로 합친다', () {
       //given
       final initials = ['ㅇ'];
       final medial = 'ㅡ';
       final finales = ['ㅅ', 'ㅅ'];
+      final group = Group.of(initials, medial, finales);
 
       //when
-      final actual = mixedFinales([Group.of(initials, medial, finales)]).first;
+      group.mixFinalesTheFirstTwoLetters();
 
       //then
-      expect(actual.initials, initials);
-      expect(actual.medial, medial);
-      expect(actual.finales, ['ㅆ']);
+      expect(group.initials, initials);
+      expect(group.medial, medial);
+      expect(group.finales, ['ㅆ']);
     });
   });
 
@@ -76,7 +77,8 @@ main() {
       final current = Group.of([], 'ㅏ', []);
 
       //when
-      final groups = replaceTheRemainingFinalesToInitials([previous, current]);
+      final groups = mixFinalesAndReplaceTheRemainingFinalesToInitials(
+          [previous, current]);
 
       //then
       final previousActual = groups.first;
@@ -94,7 +96,8 @@ main() {
       final current = Group.of([], 'ㅏ', []);
 
       //when
-      final groups = replaceTheRemainingFinalesToInitials([previous, current]);
+      final groups = mixFinalesAndReplaceTheRemainingFinalesToInitials(
+          [previous, current]);
 
       //then
       final previousActual = groups.first;
@@ -113,7 +116,8 @@ main() {
     final current = Group.of([], 'ㅏ', []);
 
     //when
-    final groups = replaceTheRemainingFinalesToInitials([previous, current]);
+    final groups =
+        mixFinalesAndReplaceTheRemainingFinalesToInitials([previous, current]);
 
     //then
     final previousActual = groups.first;
@@ -132,7 +136,8 @@ main() {
     final current = Group.of([], 'ㅏ', []);
 
     //when
-    final groups = replaceTheRemainingFinalesToInitials([previous, current]);
+    final groups =
+        mixFinalesAndReplaceTheRemainingFinalesToInitials([previous, current]);
 
     //then
     final previousActual = groups.first;

@@ -62,6 +62,11 @@ class Group {
 
   Group.of(this.initials, this.medial, this.finales);
 
+  bool get hasMedial => medial?.isNotEmpty ?? false;
+
+  List<String> get usedFinale => finales.take(1).toList();
+  List<String> get unusedFinales => finales.skip(1).toList();
+
   /// 종성에서 인접한 자음을 하나의 복합 종성으로 합친다.
   void mixFinalesTheFirstTwoLetters() {
     final a = this.finales[0];
@@ -130,14 +135,12 @@ List<Group> mixFinalesAndReplaceTheRemainingFinalesToInitials(
     List<Group> groups) {
   final items = List.of(groups);
   items.forEachFromNext((prev, curr) {
-    if (prev.medial == null || prev.finales.length == 1) {
+    if (!prev.hasMedial || prev.finales.length == 1) {
       curr.initials = prev.finales;
       prev.finales = [];
     } else {
-      final finale = prev.finales.isNotEmpty ? prev.finales.first : null;
-      final initials = prev.finales.skip(1).toList();
-      curr.initials = initials;
-      prev.finales = finale != null ? [finale] : [];
+      curr.initials = prev.unusedFinales;
+      prev.finales = prev.usedFinale;
     }
 
     /// TODO(viiviii): 왜 종성이 세 글자이거나 마지막 글자의 종성일 때만 합칠까? 그냥 2개 이상이면 합치면 안되나?

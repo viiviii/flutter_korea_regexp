@@ -52,15 +52,16 @@ String assemble(List<String> arr) {
 
 // TODO(viiviii): immutable하게 변경할 수 있을까?
 class Group {
-  List<String> initials = [];
+  List<String> initials;
   final String? medial;
-  List<String> finales = [];
-
-  Group.empty() : medial = null;
-
-  Group.fromMedial(this.medial);
+  List<String> finales;
 
   Group.of(this.initials, this.medial, this.finales);
+
+  Group.from({List<String>? initials, String? medial, List<String>? finales})
+      : this.of(initials ?? [], medial ?? '', finales ?? []);
+
+  Group.empty() : this.from();
 
   bool get hasMedial => medial?.isNotEmpty ?? false;
 
@@ -121,7 +122,7 @@ List<Group> makeGroupsUsingVowelLetters(List<String> chars) {
   final items = [cursor];
   chars.forEach((char) {
     if (isMedial(char)) {
-      cursor = Group.fromMedial(char);
+      cursor = Group.from(medial: char);
       items.add(cursor);
     } else {
       cursor.finales.add(char);

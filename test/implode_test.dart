@@ -32,17 +32,12 @@ main() {
   group('mixFinalesTheFirstTwoLetters', () {
     test('종성에서 인접한 자음을 하나의 복합 종성으로 합친다', () {
       //given
-      final initials = ['ㅇ'];
-      final medial = 'ㅡ';
-      final finales = ['ㅅ', 'ㅅ'];
-      final group = Group.of(initials, medial, finales);
+      final group = Group.from(finales: ['ㅅ', 'ㅅ']);
 
       //when
       group.mixFinalesTheFirstTwoLetters();
 
       //then
-      expect(group.initials, initials);
-      expect(group.medial, medial);
       expect(group.finales, ['ㅆ']);
     });
   });
@@ -53,15 +48,15 @@ main() {
       final groups =
           makeGroupsUsingVowelLetters(['ㅂ', 'ㅜ', 'ㄹ', 'ㄷ', 'ㅏ', 'ㄱ']);
       final group1 = groups[0];
-      expect(group1.initials, []);
-      expect(group1.medial, null);
+      expect(group1.initials, isEmpty);
+      expect(group1.medial, '');
       expect(group1.finales, ['ㅂ']);
       final group2 = groups[1];
-      expect(group2.initials, []);
+      expect(group2.initials, isEmpty);
       expect(group2.medial, 'ㅜ');
       expect(group2.finales, ['ㄹ', 'ㄷ']);
       final group3 = groups[2];
-      expect(group3.initials, []);
+      expect(group3.initials, isEmpty);
       expect(group3.medial, 'ㅏ');
       expect(group3.finales, ['ㄱ']);
     });
@@ -70,11 +65,10 @@ main() {
   group('replaceTheRemainingFinalesToInitials', () {
     test('앞 그룹에 중성이 없는 경우', () {
       //given
-      const previousMedial = null;
       const previousFinales = ['ㄱ', 'ㄱ'];
 
-      final previous = Group.of([], previousMedial, previousFinales);
-      final current = Group.of([], 'ㅏ', []);
+      final previous = Group.from(finales: previousFinales);
+      final current = Group.from(medial: 'ㅏ');
 
       //when
       final groups = mixFinalesAndReplaceTheRemainingFinalesToInitials(
@@ -83,17 +77,16 @@ main() {
       //then
       final previousActual = groups.first;
       final currentActual = groups.last;
-      expect(previousActual.finales, []);
+      expect(previousActual.finales, isEmpty);
       expect(currentActual.initials, previousFinales);
     });
 
     test('앞 그룹에 중성이 있고, 종성이 없는 경우', () {
       //given
       const previousMedial = 'ㅗ';
-      const previousFinales = <String>[];
 
-      final previous = Group.of([], previousMedial, previousFinales);
-      final current = Group.of([], 'ㅏ', []);
+      final previous = Group.from(medial: previousMedial);
+      final current = Group.from(medial: 'ㅏ');
 
       //when
       final groups = mixFinalesAndReplaceTheRemainingFinalesToInitials(
@@ -102,8 +95,8 @@ main() {
       //then
       final previousActual = groups.first;
       final currentActual = groups.last;
-      expect(previousActual.finales, []);
-      expect(currentActual.initials, previousFinales);
+      expect(previousActual.finales, isEmpty);
+      expect(currentActual.initials, isEmpty);
     });
   });
 
@@ -113,7 +106,7 @@ main() {
     const previousFinales = ['ㄱ'];
 
     final previous = Group.of([], previousMedial, previousFinales);
-    final current = Group.of([], 'ㅏ', []);
+    final current = Group.from(medial: 'ㅏ');
 
     //when
     final groups =
@@ -122,7 +115,7 @@ main() {
     //then
     final previousActual = groups.first;
     final currentActual = groups.last;
-    expect(previousActual.finales, []);
+    expect(previousActual.finales, isEmpty);
     expect(currentActual.initials, previousFinales);
   });
 
@@ -133,7 +126,7 @@ main() {
     const previousFinales = ['ㄱ', 'ㄱ'];
 
     final previous = Group.of([], previousMedial, previousFinales);
-    final current = Group.of([], 'ㅏ', []);
+    final current = Group.from(medial: 'ㅏ');
 
     //when
     final groups =
@@ -155,11 +148,11 @@ main() {
       ]);
     });
     test('빈 값인 경우 값이 추가되지 않는다', () {
-      final group = Group.of([], null, []);
+      final group = Group.empty();
       expect(groupsJoining([group]), [[]]);
     });
     test('빈 문자열인 경우 값이 추가되지 않는다', () {
-      final group = Group.of([''], '', ['']);
+      final group = Group.from(initials: [''], finales: ['']);
       expect(groupsJoining([group]), [[]]);
     });
     test('initials 값이 있는 경우, 마지막 값은 초성으로 나머지는 previous로 분리된다', () {

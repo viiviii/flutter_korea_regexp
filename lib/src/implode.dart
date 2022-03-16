@@ -14,7 +14,7 @@ String implode(String input) {
   final items2 = mixFinalesAndReplaceTheRemainingFinalesToInitials(items);
 
   /// 각 글자에 해당하는 블록 단위로 나눈다.
-  final List<List<String>> items4 = groupsJoining(items2);
+  final List<List<String>> items4 = divideByHangulBlock(items2);
 
   return items4.map(assemble).join('');
 }
@@ -53,7 +53,7 @@ String assemble(List<String> arr) {
 // TODO(viiviii): immutable하게 변경할 수 있을까?
 class Group {
   List<String> initials;
-  final String? medial;
+  final String medial;
   List<String> finales;
 
   Group.of(this.initials, this.medial, this.finales);
@@ -63,7 +63,7 @@ class Group {
 
   Group.empty() : this.from();
 
-  bool get hasMedial => medial?.isNotEmpty ?? false;
+  bool get hasMedial => medial.isNotEmpty;
 
   List<String> get usedFinale => finales.take(1).toList();
 
@@ -150,21 +150,14 @@ List<Group> mixFinalesAndReplaceTheRemainingFinalesToInitials(
 }
 
 /// 각 글자에 해당하는 블록 단위로 나눈다.
-List<List<String>> groupsJoining(List<Group> groups) {
+List<List<String>> divideByHangulBlock(List<Group> groups) {
   final List<List<String>> result = [];
   groups.forEach((e) {
-    final medial = e.medial ?? '';
+    final List<String> pre = List.of(e.initials);
+    final String initial = pre.isNotEmpty ? pre.removeLast() : '';
 
-    List<String> pre = e.initials;
     List<String> post = e.finales;
-
-    String initial = '';
     String finale = '';
-
-    if (pre.isNotEmpty) {
-      initial = pre.last;
-      pre = pre.sublist(0, pre.length - 1);
-    }
 
     if (post.isNotEmpty && isFinale(post.first)) {
       finale = post.first;
@@ -172,7 +165,7 @@ List<List<String>> groupsJoining(List<Group> groups) {
     }
 
     pre.where((e) => e.isNotEmpty).forEach((e) => result.add([e]));
-    result.add([initial, medial, finale].where((e) => e.isNotEmpty).toList());
+    result.add([initial, e.medial, finale].where((e) => e.isNotEmpty).toList());
     post.where((e) => e.isNotEmpty).forEach((e) => result.add([e]));
   });
   return result;

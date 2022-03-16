@@ -66,18 +66,8 @@ class Group {
   bool get hasMedial => medial?.isNotEmpty ?? false;
 
   List<String> get usedFinale => finales.take(1).toList();
-  List<String> get unusedFinales => finales.skip(1).toList();
 
-  /// 종성에서 인접한 자음을 하나의 복합 종성으로 합친다.
-  void mixFinalesTheFirstTwoLetters() {
-    const MIX_LETTERS_LENGTH = 2;
-    final letter = finales.take(MIX_LETTERS_LENGTH).join();
-    final rest = finales.skip(MIX_LETTERS_LENGTH);
-    final mix = complexDict[letter];
-    if (mix != null) {
-      finales = [mix, ...rest];
-    }
-  }
+  List<String> get unusedFinales => finales.skip(1).toList();
 
   @override
   String toString() => '$runtimeType($initials, $medial, $finales)';
@@ -146,7 +136,12 @@ List<Group> mixFinalesAndReplaceTheRemainingFinalesToInitials(
 
     if (curr.finales.length > 2 ||
         (curr == items.last && curr.finales.length > 1)) {
-      curr.mixFinalesTheFirstTwoLetters();
+      final letter = curr.finales.take(2).join();
+      final rest = curr.finales.skip(2);
+      final mix = complexDict[letter];
+      if (mix != null) {
+        curr.finales = [mix, ...rest];
+      }
     }
   });
   return items;

@@ -29,19 +29,6 @@ main() {
     });
   });
 
-  group('mixFinalesTheFirstTwoLetters', () {
-    test('종성에서 인접한 자음을 하나의 복합 종성으로 합친다', () {
-      //given
-      final group = Group.from(finales: ['ㅅ', 'ㅅ']);
-
-      //when
-      group.mixFinalesTheFirstTwoLetters();
-
-      //then
-      expect(group.finales, ['ㅆ']);
-    });
-  });
-
   // TODO(viiviii): 이최선인가?
   group('makeGroupsUsingVowelLetters', () {
     test('모음을 기준으로 Group 리스트를 만든다', () {

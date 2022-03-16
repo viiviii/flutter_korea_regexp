@@ -127,40 +127,49 @@ main() {
     expect(currentActual.initials, [previousFinales.last]);
   });
 
-  group('groupsJoining', () {
+  group('divideByHangulBlock', () {
     test('[[ㄲ], ㅗ, [ㅊ]] -> [ㄲ, ㅗ, ㅊ]', () {
       final group = Group.of(['ㄲ'], 'ㅗ', ['ㅊ']);
-      expect(groupsJoining([group]), [
+      expect(divideByHangulBlock([group]), [
         ['ㄲ', 'ㅗ', 'ㅊ']
       ]);
     });
     test('빈 값인 경우 값이 추가되지 않는다', () {
       final group = Group.empty();
-      expect(groupsJoining([group]), [[]]);
+      expect(divideByHangulBlock([group]), [[]]);
     });
     test('빈 문자열인 경우 값이 추가되지 않는다', () {
       final group = Group.from(initials: [''], finales: ['']);
-      expect(groupsJoining([group]), [[]]);
+      expect(divideByHangulBlock([group]), [[]]);
     });
-    test('initials 값이 있는 경우, 마지막 값은 초성으로 나머지는 previous로 분리된다', () {
+    test('initials의 마지막 글자는 초성으로 나머지는 분리된다', () {
       final group = Group.of(['ㅇ', 'ㄲ'], 'ㅗ', ['ㅊ']);
-      expect(groupsJoining([group]), [
+      expect(divideByHangulBlock([group]), [
         ['ㅇ'],
         ['ㄲ', 'ㅗ', 'ㅊ']
       ]);
     });
-    test('finales 값이 있고 첫번째 값이 유효한 종성이면, 첫번째 값은 종성으로 나머지는 post로 분리된다', () {
+    test('finales의 첫번째 글자는 종성으로 나머지는 분리된다', () {
       final group = Group.of(['ㄲ'], 'ㅗ', ['ㅊ', 'ㅇ']);
-      expect(groupsJoining([group]), [
+      expect(divideByHangulBlock([group]), [
         ['ㄲ', 'ㅗ', 'ㅊ'],
         ['ㅇ']
       ]);
     });
-    test('finales 값이 있고 첫번째 값이 유효한 종성이 아니면, 모두 post로 분리된다', () {
-      final group = Group.of(['ㄲ'], 'ㅗ', ['sㅊ']);
-      expect(groupsJoining([group]), [
+    test('finales의 첫번째 글자가 올바른 종성이 아니면 모두 분리된다', () {
+      final group = Group.of(['ㄲ'], 'ㅗ', ['s', 'ㅊ']);
+      expect(divideByHangulBlock([group]), [
         ['ㄲ', 'ㅗ'],
-        ['sㅊ']
+        ['s'],
+        ['ㅊ']
+      ]);
+    });
+    // TODO(viiviii): 초성의 유효성 검사는 여기서 실행되지 않음
+    test('초성은 유효성 검사를 하지 않는다', () {
+      final group = Group.of(['ㄲ', 's'], 'ㅗ', ['ㅊ']);
+      expect(divideByHangulBlock([group]), [
+        ['ㄲ'],
+        ['s', 'ㅗ', 'ㅊ']
       ]);
     });
   });

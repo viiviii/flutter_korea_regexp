@@ -134,10 +134,12 @@ List<Group> mixFinalesAndReplaceTheRemainingFinalesToInitials(
       prev.finales = prev.usedFinale;
     }
 
-    if (curr.finales.length > 2 ||
-        (curr == items.last && curr.finales.length > 1)) {
-      final letter = curr.finales.take(2).join();
-      final rest = curr.finales.skip(2);
+    const MIX_LETTERS_LENGTH = 2;
+    const NEXT_INITIAL_LENGTH = 1;
+    if (curr.finales.length >= MIX_LETTERS_LENGTH + NEXT_INITIAL_LENGTH ||
+        (curr == items.last && curr.finales.length >= MIX_LETTERS_LENGTH)) {
+      final letter = curr.finales.take(MIX_LETTERS_LENGTH).join();
+      final rest = curr.finales.skip(MIX_LETTERS_LENGTH);
       final mix = complexDict[letter];
       if (mix != null) {
         curr.finales = [mix, ...rest];

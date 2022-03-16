@@ -70,12 +70,12 @@ class Group {
 
   /// 종성에서 인접한 자음을 하나의 복합 종성으로 합친다.
   void mixFinalesTheFirstTwoLetters() {
-    final a = this.finales[0];
-    final b = this.finales[1];
-    final mix = complexDict['$a$b'];
+    const MIX_LETTERS_LENGTH = 2;
+    final letter = finales.take(MIX_LETTERS_LENGTH).join();
+    final rest = finales.skip(MIX_LETTERS_LENGTH);
+    final mix = complexDict[letter];
     if (mix != null) {
-      final rest = this.finales.skip(2);
-      this.finales = [mix, ...rest];
+      finales = [mix, ...rest];
     }
   }
 
@@ -144,7 +144,6 @@ List<Group> mixFinalesAndReplaceTheRemainingFinalesToInitials(
       prev.finales = prev.usedFinale;
     }
 
-    /// TODO(viiviii): 왜 종성이 세 글자이거나 마지막 글자의 종성일 때만 합칠까? 그냥 2개 이상이면 합치면 안되나?
     if (curr.finales.length > 2 ||
         (curr == items.last && curr.finales.length > 1)) {
       curr.mixFinalesTheFirstTwoLetters();

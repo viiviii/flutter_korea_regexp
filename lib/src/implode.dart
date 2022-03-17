@@ -115,18 +115,8 @@ String assemble(List<String> arr) {
   String medial = arr.sublist(startIndex, endIndex + 1).join();
   String finale = arr.sublist(endIndex + 1).join();
 
-  var initialOffset = INITIALS.indexOf(complexDict[initial] ?? initial);
-  var medialOffset = MEDIALS.indexOf(complexDict[medial] ?? medial);
-  var finaleOffset = FINALES.indexOf(complexDict[finale] ?? finale);
-
-  if (initialOffset != -1 && medialOffset != -1) {
-    return String.fromCharCode(BASE +
-        initialOffset * (MEDIALS.length * FINALES.length) +
-        medialOffset * FINALES.length +
-        finaleOffset);
-  }
-
-  return arr.join();
+  final offsets = SyllableOffsets.from(initial, medial, finale);
+  return offsets.isValid ? offsets.toSyllable() : arr.join();
 }
 
 /// 해당 글자가 중성인지
@@ -154,6 +144,41 @@ class Group {
 
   @override
   String toString() => '$runtimeType($initials, $medial, $finales)';
+}
+
+/// 올바른 초성, 중성, 종성일 경우 하나의 한글 음절을 구할 수 있다.
+///
+/// 자모는 [INITIALS], [MEDIALS], [FINALES] 리스트에 알고리즘적으로 매핑되어 있다.
+/// 이 클래스의 필드 값은 이 상수 리스트에서 얻은 값이며 한글 음절을 구하는 계산식에 사용된다.
+///
+/// for Example,
+/// ```dart
+/// var offsets = SyllableOffsets('ㅎ', 'ㅏ', 'ㄴ');
+/// var syllable = offset.toSyllable(); // 한
+/// ```
+/// 내부적으로 다음과 같이 계산된다.
+/// - 한 = ㅎ(18), ㅏ(0), ㄴ(4) = 44032 + [18 × 588 + 0 × 28 + 4] = 54620
+class SyllableOffsets {
+  final int initial;
+  final int medial;
+  final int finale;
+
+  SyllableOffsets.from(String initial, String medial, String finale)
+      : initial = INITIALS.indexOf(complexDict[initial] ?? initial),
+        medial = MEDIALS.indexOf(complexDict[medial] ?? medial),
+        finale = FINALES.indexOf(complexDict[finale] ?? finale);
+
+  bool get isValid => initial != -1 && medial != -1;
+
+  String toSyllable() => String.fromCharCode(_compositionCharCode());
+
+  /// 필드 값으로 하나의 한글 음절 유니코드 코드포인트를 구한다.
+  int _compositionCharCode() {
+    return BASE +
+        initial * (MEDIALS.length * FINALES.length) +
+        medial * FINALES.length +
+        finale;
+  }
 }
 
 extension _<E> on List<E> {

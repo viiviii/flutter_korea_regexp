@@ -194,10 +194,26 @@ main() {
       expect(assemble(['ㅜ', 'ㅜ', 'ㅣ']), 'ㅜㅜㅣ');
       expect(assemble(['ㄱ', 'ㄱ', 'ㄱ']), 'ㄱㄱㄱ');
     });
-    // TODO(viiviii)
-    test('항상 한글이 올 것을 예상하므로 영어가 포함된 경우 다르게 동작할 수도 있다', () {
-      expect(assemble(['ㅇ', 'ㅗ', 'f']), isNot(equals('ㅇㅗf')));
-      expect(assemble(['f', 'ㅗ', 'ㅇ']), equals('fㅗㅇ'));
+  });
+
+  group('SyllableOffsets', () {
+    test('초성이 유효하지 않으면 isValid는 false를 리턴한다', () {
+      final offsets = SyllableOffsets.from('ㄽ', 'ㅗ', 'ㅇ');
+      expect(offsets.isValid, false);
+    });
+    test('중성이 유효하지 않으면 isValid는 false를 리턴한다', () {
+      final offsets = SyllableOffsets.from('ㄹ', 'ㄹ', 'ㅇ');
+      expect(offsets.isValid, false);
+    });
+    test('올바른 자모일 경우 한글 음절을 리턴한다', () {
+      final offsets = SyllableOffsets.from('ㄲ', 'ㅗ', 'ㅊ');
+      expect(offsets.toSyllable(), '꽃');
+    });
+
+    // TODO(viiviii): 그러므로 유효하지 않는 종성일 경우 의도치 않게 동작
+    test('종성은 isValid에서 유효성 검사를 하지 않는다', () {
+      final offsets = SyllableOffsets.from('ㄹ', 'ㅗ', 'ㅗ');
+      expect(offsets.isValid, isNot(false));
     });
   });
 }

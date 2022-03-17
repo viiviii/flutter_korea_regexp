@@ -24,10 +24,9 @@ String implode(String input) {
 List<String> mixMedial(List<String> inputs) {
   final chars = [inputs.first];
   inputs.forEachFromNext((previous, current) {
-    if (_isMedial(previous) &&
-        _isMedial(current) &&
-        complexDict['$previous$current'] != null) {
-      chars.last = complexDict['$previous$current']!;
+    final mixedLetter = _mix(previous, current);
+    if (_isMedial(previous) && _isMedial(current) && mixedLetter != null) {
+      chars.last = mixedLetter;
     } else {
       chars.add(current);
     }
@@ -67,11 +66,11 @@ List<Group> mixFinaleAndReplaceTheRemainingFinalesToInitials(
     const NEXT_INITIAL_LENGTH = 1;
     if (curr.finales.length >= MIX_LETTERS_LENGTH + NEXT_INITIAL_LENGTH ||
         (curr == items.last && curr.finales.length >= MIX_LETTERS_LENGTH)) {
-      final letter = curr.finales.take(MIX_LETTERS_LENGTH).join();
+      final letters = curr.finales.take(MIX_LETTERS_LENGTH);
       final rest = curr.finales.skip(MIX_LETTERS_LENGTH);
-      final mix = complexDict[letter];
-      if (mix != null) {
-        curr.finales = [mix, ...rest];
+      final mixedLetter = _mix(letters.first, letters.last);
+      if (mixedLetter != null) {
+        curr.finales = [mixedLetter, ...rest];
       }
     }
   });
@@ -98,12 +97,6 @@ List<List<String>> divideByHangulBlock(List<Group> groups) {
   });
   return result;
 }
-
-/// 해당 글자가 중성인지
-bool _isMedial(String? char) => MEDIALS.contains(char);
-
-/// 해당 글자가 종성인지
-bool _isFinale(String? char) => FINALES.contains(char);
 
 String assemble(List<String> arr) {
   final startIndex = arr.indexWhere((e) => MEDIALS.indexOf(e) != -1);
@@ -135,6 +128,15 @@ String assemble(List<String> arr) {
 
   return arr.join();
 }
+
+/// 해당 글자가 중성인지
+bool _isMedial(String? char) => MEDIALS.contains(char);
+
+/// 해당 글자가 종성인지
+bool _isFinale(String? char) => FINALES.contains(char);
+
+/// 복합 자모일 경우 합친 글자를 리턴한다
+String? _mix(String first, String last) => complexDict['$first$last'];
 
 class Group {
   List<String> initials;

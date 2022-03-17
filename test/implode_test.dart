@@ -167,4 +167,37 @@ main() {
       ]);
     });
   });
+
+  group('assemble', () {
+    test('[ㄲ, ㅗ, ㅊ] -> 꽃', () {
+      expect(assemble(['ㄲ', 'ㅗ', 'ㅊ']), '꽃');
+    });
+    test('빈 리스트일 땐 빈 문자열을 리턴한다', () {
+      expect(assemble([]), '');
+    });
+    test('빈 문자열 리스트일 땐 빈 문자열을 리턴한다', () {
+      expect(assemble(['', '', '']), '');
+    });
+    test('유효한 형식이 아닌 경우 - 종성이 초성에 있음', () {
+      expect(assemble(['ㄽ', 'ㅗ', 'ㅇ']), 'ㄽㅗㅇ');
+    });
+    test('유효한 형식이 아닌 경우 - 중성이 없음', () {
+      expect(assemble(['ㅇ', 'ㅇ', 'ㅇ']), 'ㅇㅇㅇ');
+    });
+
+    // TODO(viiviii): 왜죠
+    test('복합 자모인 경우', () {
+      expect(assemble(['ㅇ', 'ㅜ', 'ㅣ']), '위');
+      expect(assemble(['ㅇ', 'ㅗ', 'ㅏ']), '와');
+
+      expect(assemble(['ㅗ', 'ㅏ', 'ㅇ']), 'ㅗㅏㅇ');
+      expect(assemble(['ㅜ', 'ㅜ', 'ㅣ']), 'ㅜㅜㅣ');
+      expect(assemble(['ㄱ', 'ㄱ', 'ㄱ']), 'ㄱㄱㄱ');
+    });
+    // TODO(viiviii)
+    test('항상 한글이 올 것을 예상하므로 영어가 포함된 경우 다르게 동작할 수도 있다', () {
+      expect(assemble(['ㅇ', 'ㅗ', 'f']), isNot(equals('ㅇㅗf')));
+      expect(assemble(['f', 'ㅗ', 'ㅇ']), equals('fㅗㅇ'));
+    });
+  });
 }

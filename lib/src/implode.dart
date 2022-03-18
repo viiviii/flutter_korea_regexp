@@ -99,24 +99,38 @@ List<List<String>> divideByHangulBlock(List<Group> groups) {
 }
 
 String assemble(List<String> arr) {
-  final startIndex = arr.indexWhere((e) => MEDIALS.indexOf(e) != -1);
-  final endIndex = startIndex != -1 &&
-          startIndex != arr.length - 1 &&
-          MEDIALS.indexOf(arr[startIndex + 1]) != -1
-      ? startIndex + 1
-      : startIndex;
-
-  // TODO(viiviii)
-  if (startIndex == -1 || endIndex == -1) {
+  if (!arr.any(_isMedial)) {
     return arr.join();
   }
 
-  String initial = arr.sublist(0, startIndex).join();
-  String medial = arr.sublist(startIndex, endIndex + 1).join();
-  String finale = arr.sublist(endIndex + 1).join();
+  final block = divide(arr);
 
-  final offsets = SyllableOffsets.from(initial, medial, finale);
-  return offsets.isValid ? offsets.toSyllable() : arr.join();
+  // TODO(viiviii)
+  final offsets =
+      SyllableOffsets.from(block.initial, block.medial, block.finale);
+
+  if (!offsets.isValid) {
+    return arr.join();
+  }
+
+  return offsets.toSyllable();
+}
+
+// TODO(viiviii): 유효성 검증 로직 한곳으로
+// 모음(최대 2개)를 기준으로 블럭 단위에서 초성, 중성, 종성 글자를 나눈다
+// 특이사항 -> 중성이 3글자여도 2글자만 중성으로 감
+Block divide(List<String> arr) {
+  final startMedialIndex = arr.indexWhere(_isMedial);
+  final isMedialNext = startMedialIndex != arr.length - 1 &&
+      _isMedial(arr[startMedialIndex + 1]);
+  final endMedialIndex = isMedialNext ? startMedialIndex + 1 : startMedialIndex;
+  final finaleIndex = endMedialIndex + 1;
+
+  final initial = arr.sublist(0, startMedialIndex).join();
+  final medial = arr.sublist(startMedialIndex, finaleIndex).join();
+  final finale = arr.sublist(finaleIndex).join();
+
+  return Block(initial, medial, finale);
 }
 
 /// 해당 글자가 중성인지
@@ -144,6 +158,14 @@ class Group {
 
   @override
   String toString() => '$runtimeType($initials, $medial, $finales)';
+}
+
+class Block {
+  final String initial;
+  final String medial;
+  final String finale;
+
+  Block(this.initial, this.medial, this.finale);
 }
 
 /// 올바른 초성, 중성, 종성일 경우 하나의 한글 음절을 구할 수 있다.

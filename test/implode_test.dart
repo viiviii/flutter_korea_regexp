@@ -172,11 +172,8 @@ main() {
     test('[ㄲ, ㅗ, ㅊ] -> 꽃', () {
       expect(assemble(['ㄲ', 'ㅗ', 'ㅊ']), '꽃');
     });
-    test('빈 리스트일 땐 빈 문자열을 리턴한다', () {
-      expect(assemble([]), '');
-    });
-    test('빈 문자열 리스트일 땐 빈 문자열을 리턴한다', () {
-      expect(assemble(['', '', '']), '');
+    test('종성이 없는 경우 연결된 문자열을 리턴한다', () {
+      expect(assemble(['ㅇ', 'ㅇ', 'ㅇ']), 'ㅇㅇㅇ');
     });
     test('유효한 형식이 아닌 경우 - 종성이 초성에 있음', () {
       expect(assemble(['ㄽ', 'ㅗ', 'ㅇ']), 'ㄽㅗㅇ');
@@ -189,10 +186,22 @@ main() {
     test('복합 자모인 경우', () {
       expect(assemble(['ㅇ', 'ㅜ', 'ㅣ']), '위');
       expect(assemble(['ㅇ', 'ㅗ', 'ㅏ']), '와');
+    });
+  });
 
-      expect(assemble(['ㅗ', 'ㅏ', 'ㅇ']), 'ㅗㅏㅇ');
-      expect(assemble(['ㅜ', 'ㅜ', 'ㅣ']), 'ㅜㅜㅣ');
-      expect(assemble(['ㄱ', 'ㄱ', 'ㄱ']), 'ㄱㄱㄱ');
+  group('divide', () {
+    test('올바른 음절 블럭에서 초성, 중성, 종성을 분리한다', () {
+      final block = divide(['ㄲ', 'ㅗ', 'ㅊ']);
+      expect(block.initial, 'ㄲ');
+      expect(block.medial, 'ㅗ');
+      expect(block.finale, 'ㅊ');
+    });
+    // TODO(viiviii)
+    test('중성이 2글자 이상이어도 2글자만 중성으로 분리된다', () {
+      final block = divide(['ㅇ', 'ㅜ', 'ㅣ', 'ㅜ', 'ㅣ']);
+      expect(block.initial, 'ㅇ');
+      expect(block.medial, 'ㅜㅣ');
+      expect(block.finale, 'ㅜㅣ');
     });
   });
 
@@ -210,10 +219,27 @@ main() {
       expect(offsets.toSyllable(), '꽃');
     });
 
-    // TODO(viiviii): 그러므로 유효하지 않는 종성일 경우 의도치 않게 동작
+    // TODO(viiviii): 1. 유효하지 않는 종성일 경우 의도치 않게 동작
+    // TODO(viiviii): 2. 초성, 중성, 종성에서 MIXED를 사용하여 복합 자모를 한번 더 합치는데 MIXED는 중성+종성 복합자모이므로 초성이 빠져있는 듯 함(ㅃ, ㄸ)
     test('종성은 isValid에서 유효성 검사를 하지 않는다', () {
       final offsets = SyllableOffsets.from('ㄹ', 'ㅗ', 'ㅗ');
       expect(offsets.isValid, isNot(false));
+    });
+    test('복합 초성를 한번 더 합친다', () {
+      final offsets = SyllableOffsets.from('ㄱㄱ', 'ㅗ', 'ㅊ');
+      expect(offsets.toSyllable(), '꽃');
+    });
+    test('복합 중성를 한번 더 합친다', () {
+      final offsets = SyllableOffsets.from('ㅇ', 'ㅜㅣ', '');
+      expect(offsets.toSyllable(), '위');
+    });
+    test('복합 종성를 한번 더 합친다', () {
+      final offsets = SyllableOffsets.from('ㅇ', 'ㅣ', 'ㅅㅅ');
+      expect(offsets.toSyllable(), '있');
+    });
+    test('하지만 초성에서 ㄸ, ㅃ와 같은 복합 자모는 합치지 못한다', () {
+      final offsets = SyllableOffsets.from('ㄷㄷ', 'ㅣ', '');
+      expect(offsets.toSyllable(), isNot('띠'));
     });
   });
 }

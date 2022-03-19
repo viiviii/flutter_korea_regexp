@@ -4,10 +4,10 @@ final complexDict = MIXED.map((k, v) => MapEntry(v.join(), k));
 
 String implode(String input) {
   /// 인접한 모음을 하나의 복합 모음으로 합친다.
-  final chars = mixMedial(input.split(''));
+  final letters = mixMedial(input.split(''));
 
   /// 모음으로 시작하는 그룹들을 만든다.
-  final createdGroups = createGroupsByMedial(chars);
+  final createdGroups = createGroupsByMedial(letters);
 
   /// 각 그룹을 순회하면서 복합자음을 정리하고, 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
   final groups =
@@ -15,7 +15,7 @@ String implode(String input) {
 
   /// 각 글자에 해당하는 블록 단위로 나눈다.
   final blocks = groups.fold<List<List<String>>>(
-      [], (acc, group) => acc..addAll(divideByHangulBlocks(group)));
+      [], (acc, group) => acc..addAll(divideByBlock(group)));
 
   return blocks.map(assemble).join();
 }
@@ -78,7 +78,7 @@ List<Group> mixFinaleAndReplaceTheRemainingFinalesToInitials(
 }
 
 /// 각 글자에 해당하는 블록 단위로 나눈다.
-List<List<String>> divideByHangulBlocks(Group group) {
+List<List<String>> divideByBlock(Group group) {
   final pre = List.of(group.initials);
   final initial = pre.isNotEmpty ? pre.removeLast() : '';
 

@@ -123,51 +123,51 @@ main() {
     expect(currentActual.initials, [previousFinales.last]);
   });
 
-  group('divideByHangulBlocks', () {
-    test('`initials`의 마지막 글자만 초성으로 남긴다', () {
+  group('divideByBlock', () {
+    test('`Group initials`의 마지막 글자만 초성으로 남긴다', () {
       final group = Group.fromMedial('ㅗ')
         ..initials = ['ㅇ', 'ㄲ']
         ..finales = ['ㅊ'];
-      expect(divideByHangulBlocks(group), [
+      expect(divideByBlock(group), [
         ['ㅇ'],
         ['ㄲ', 'ㅗ', 'ㅊ']
       ]);
     });
-    test('`finales`의 첫번째 글자만 종성으로 남긴다', () {
+    test('`Group finales`의 첫번째 글자만 종성으로 남긴다', () {
       final group = Group.fromMedial('ㅗ')
         ..initials = ['ㄲ']
         ..finales = ['ㅊ', 'ㅇ'];
-      expect(divideByHangulBlocks(group), [
+      expect(divideByBlock(group), [
         ['ㄲ', 'ㅗ', 'ㅊ'],
         ['ㅇ']
       ]);
     });
-    test('`finales`의 첫번째 글자가 유효하지 않으면 종성으로 사용되지 않는다', () {
+    test('`Group finales`의 첫번째 글자가 유효하지 않으면 종성으로 사용되지 않는다', () {
       final group = Group.fromMedial('ㅗ')
         ..initials = ['ㄲ']
         ..finales = ['s', 'ㅊ'];
-      expect(divideByHangulBlocks(group), [
+      expect(divideByBlock(group), [
         ['ㄲ', 'ㅗ'],
         ['s'],
         ['ㅊ']
       ]);
     });
-    test('빈 값인 경우 값이 추가되지 않는다', () {
+    test('빈 값인 경우 빈 배열을 리턴한다', () {
       final group = Group.empty();
-      expect(divideByHangulBlocks(group), [[]]);
+      expect(divideByBlock(group), [[]]);
     });
-    test('빈 문자열인 경우 값이 추가되지 않는다', () {
+    test('빈 문자열인 경우 빈 배열을 리턴한다', () {
       final group = Group.empty()
         ..initials = ['']
         ..finales = [''];
-      expect(divideByHangulBlocks(group), [[]]);
+      expect(divideByBlock(group), [[]]);
     });
     // TODO(viiviii): 초성의 유효성 검사는 여기서 실행되지 않음
     test('초성은 유효성 검사를 하지 않고 사용된다', () {
       final group = Group.fromMedial('ㅗ')
         ..initials = ['ㄲ', 's']
         ..finales = ['ㅊ'];
-      expect(divideByHangulBlocks(group), [
+      expect(divideByBlock(group), [
         ['ㄲ'],
         ['s', 'ㅗ', 'ㅊ']
       ]);

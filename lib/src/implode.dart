@@ -24,9 +24,9 @@ String implode(String input) {
 List<String> mixMedial(List<String> inputs) {
   final chars = [inputs.first];
   inputs.forEachFromNext((previous, current) {
-    final mixedLetter = _mix(previous, current);
-    if (_isMedial(previous) && _isMedial(current) && mixedLetter != null) {
-      chars.last = mixedLetter;
+    final mixedMedial = _mix(previous, current);
+    if (_isMedial(previous) && _isMedial(current) && mixedMedial != null) {
+      chars.last = mixedMedial;
     } else {
       chars.add(current);
     }
@@ -36,7 +36,7 @@ List<String> mixMedial(List<String> inputs) {
 
 /// 모음으로 시작하는 그룹들을 만든다.
 List<Group> createGroupsByMedial(List<String> chars) {
-  Group cursor = Group.empty();
+  var cursor = Group.empty();
   final items = [cursor];
   chars.forEach((e) {
     if (_isMedial(e)) {
@@ -68,9 +68,9 @@ List<Group> mixFinaleAndReplaceTheRemainingFinalesToInitials(
         (curr == items.last && curr.finales.length >= MIX_LETTERS_LENGTH)) {
       final letters = curr.finales.take(MIX_LETTERS_LENGTH);
       final rest = curr.finales.skip(MIX_LETTERS_LENGTH);
-      final mixedLetter = _mix(letters.first, letters.last);
-      if (mixedLetter != null) {
-        curr.finales = [mixedLetter, ...rest];
+      final mixedFinale = _mix(letters.first, letters.last);
+      if (mixedFinale != null) {
+        curr.finales = [mixedFinale, ...rest];
       }
     }
   });

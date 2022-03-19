@@ -5,7 +5,6 @@ main() {
   group('implode', () {
     [
       ['ㄲㅏㄱㄷㅜㄱㅣ', '깍두기'],
-      ['ㄱㄱㅏㄱㄷㅜㄱㅣ', 'ㄱ각두기'], // TODO(viiviii): 초성 ㄱㄱ는 안합치고 종성 ㄱㄱ은 합쳐짐
       ['ㄲㅏㄱㄱㄷㅜㄱㅣ', '깎두기'],
       ['ㅂㅜㄹㄷㅏㄹㄱ', '불닭'],
       ['ㅂㅜㄹㄷㅏㄹㄱㅇㅡㄴ', '불닭은'],
@@ -25,106 +24,109 @@ main() {
     });
     test('합칠 수 있는 복합 모음이 없는 경우 변경 사항이 없다', () {
       expect(mixMedial(['ㅇ', 'ㅣ', 'ㅇ']), ['ㅇ', 'ㅣ', 'ㅇ']);
-      expect(mixMedial(['ㅇ', 'ㅣ', 'ㅜ']), ['ㅇ', 'ㅣ', 'ㅜ']);
     });
   });
 
   group('createGroupsByMedial', () {
-    test('ㄱ, ㅡ , ㄹ, ㅐ -> [ㄱ], [ㅡ, ㄹ], [ㅐ]', () {
+    test('모음을 기준으로 `Groups`을 생성한다', () {
       final groups = createGroupsByMedial(['ㄱ', 'ㅡ', 'ㄹ', 'ㅐ']);
 
       final group1 = groups[0];
       expect(group1.finales, ['ㄱ']);
+
       final group2 = groups[1];
       expect(group2.medial, 'ㅡ');
       expect(group2.finales, ['ㄹ']);
+
       final group3 = groups[2];
       expect(group3.medial, 'ㅐ');
     });
   });
 
-  // TODO(viiviii)
-  group('mixFinaleAndReplaceTheRemainingFinalesToInitials', () {
-    test('앞 그룹에 중성이 없는 경우', () {
+  group('앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져오는 로직 테스트', () {
+    test(
+        '앞 그룹에 중성이 없는 경우,'
+        '앞 그룹의 모든 종성을 현재 그룹의 초성으로 가져온다', () {
       //given
-      const previousFinales = ['ㄱ', 'ㄱ'];
-
-      final previous = Group.empty()..finales = previousFinales;
+      final previous = Group.empty()..finales = ['ㄱ', 'ㄱ'];
       final current = Group.fromMedial('ㅏ');
-
       //when
       final groups =
           mixFinaleAndReplaceTheRemainingFinalesToInitials([previous, current]);
-
       //then
       final previousActual = groups.first;
       final currentActual = groups.last;
       expect(previousActual.finales, isEmpty);
-      expect(currentActual.initials, previousFinales);
+      expect(currentActual.initials, ['ㄱ', 'ㄱ']);
     });
-
-    test('앞 그룹에 중성이 있고, 종성이 없는 경우', () {
+    test(
+        '앞 그룹에 중성이 있고 종성은 1개인 경우,'
+        '앞 그룹의 모든 종성을 현재 그룹의 초성으로 가져온다', () {
       //given
-      const previousMedial = 'ㅗ';
-
-      final previous = Group.fromMedial(previousMedial);
+      final previous = Group.fromMedial('ㅗ')..finales = ['ㄱ'];
       final current = Group.fromMedial('ㅏ');
-
       //when
       final groups =
           mixFinaleAndReplaceTheRemainingFinalesToInitials([previous, current]);
-
       //then
       final previousActual = groups.first;
       final currentActual = groups.last;
       expect(previousActual.finales, isEmpty);
-      expect(currentActual.initials, isEmpty);
+      expect(currentActual.initials, ['ㄱ']);
+    });
+    test(
+        '앞 그룹에 중성이 있고 종성이 여러 개인 경우,'
+        '앞 그룹의 종성을 1개만 남기고 모두 현재 그룹의 초성으로 가져온다', () {
+      //given
+      final previous = Group.fromMedial('ㅗ')..finales = ['ㄱ', 'ㄴ', 'ㄷ'];
+      final current = Group.fromMedial('ㅏ');
+      //when
+      final groups =
+          mixFinaleAndReplaceTheRemainingFinalesToInitials([previous, current]);
+      //then
+      final previousActual = groups.first;
+      final currentActual = groups.last;
+      expect(previousActual.finales, ['ㄱ']);
+      expect(currentActual.initials, ['ㄴ', 'ㄷ']);
     });
   });
 
-  test('앞 그룹에 중성이 있고, 종성이 1개인 경우', () {
-    //given
-    const previousMedial = 'ㅗ';
-    const previousFinales = ['ㄱ'];
-
-    final previous = Group.fromMedial(previousMedial)
-      ..finales = previousFinales;
-    final current = Group.fromMedial('ㅏ');
-
-    //when
-    final groups =
-        mixFinaleAndReplaceTheRemainingFinalesToInitials([previous, current]);
-
-    //then
-    final previousActual = groups.first;
-    final currentActual = groups.last;
-    expect(previousActual.finales, isEmpty);
-    expect(currentActual.initials, previousFinales);
-  });
-
-  test('앞 그룹에 중성이 있고, 종성이 여러개인 경우', () {
-    //given
-    const previousMedial = 'ㅗ';
-    const previousFinales = ['ㄱ', 'ㄱ'];
-
-    final previous = Group.fromMedial(previousMedial)
-      ..finales = previousFinales;
-    final current = Group.fromMedial('ㅏ');
-
-    //when
-    final groups =
-        mixFinaleAndReplaceTheRemainingFinalesToInitials([previous, current]);
-
-    //then
-    final previousActual = groups.first;
-    final currentActual = groups.last;
-
-    expect(previousActual.finales, [previousFinales.first]);
-    expect(currentActual.initials, [previousFinales.last]);
+  group('복합자음 정리 로직 테스트', () {
+    test('현재 그룹의 종성이 3개 이상이면 복합자음을 정리한다', () {
+      //given
+      final previous = Group.empty();
+      final current = Group.fromMedial('ㅏ')..finales = ['ㄱ', 'ㄱ', 'ㄱ'];
+      //when
+      final groups =
+          mixFinaleAndReplaceTheRemainingFinalesToInitials([previous, current]);
+      //then
+      expect(groups.last.finales, ['ㄲ', 'ㄱ']);
+    });
+    test('현재 그룹이 리스트의 마지막 요소이면 종성이 2개 이상일 때 복합자음을 정리한다', () {
+      //given
+      final previous = Group.empty();
+      final current = Group.fromMedial('ㅏ')..finales = ['ㄱ', 'ㄱ'];
+      //when
+      final groups =
+          mixFinaleAndReplaceTheRemainingFinalesToInitials([previous, current]);
+      //then
+      expect(current, equals(groups.last));
+      expect(groups.last.finales, ['ㄲ']);
+    });
+    test('복합자음이 유효하지 않으면 정리되지 않는다', () {
+      //given
+      final previous = Group.empty();
+      final current = Group.fromMedial('ㅏ')..finales = ['ㅋ', 'ㅎ'];
+      //when
+      final groups =
+          mixFinaleAndReplaceTheRemainingFinalesToInitials([previous, current]);
+      //then
+      expect(groups.last.finales, ['ㅋ', 'ㅎ']);
+    });
   });
 
   group('divideByBlock', () {
-    test('`Group initials`의 마지막 글자만 초성으로 남긴다', () {
+    test('`Group initials`의 마지막 글자만 초성으로 사용된다', () {
       final group = Group.fromMedial('ㅗ')
         ..initials = ['ㅇ', 'ㄲ']
         ..finales = ['ㅊ'];
@@ -133,7 +135,7 @@ main() {
         ['ㄲ', 'ㅗ', 'ㅊ']
       ]);
     });
-    test('`Group finales`의 첫번째 글자만 종성으로 남긴다', () {
+    test('`Group finales`의 첫번째 글자만 종성으로 사용된다', () {
       final group = Group.fromMedial('ㅗ')
         ..initials = ['ㄲ']
         ..finales = ['ㅊ', 'ㅇ'];
@@ -152,6 +154,15 @@ main() {
         ['ㅊ']
       ]);
     });
+    test('초성은 유효성 검사를 하지 않고 사용된다', () {
+      final group = Group.fromMedial('ㅗ')
+        ..initials = ['ㄲ', 's']
+        ..finales = ['ㅊ'];
+      expect(divideByBlock(group), [
+        ['ㄲ'],
+        ['s', 'ㅗ', 'ㅊ']
+      ]);
+    });
     test('빈 값인 경우 빈 배열을 리턴한다', () {
       final group = Group.empty();
       expect(divideByBlock(group), [[]]);
@@ -162,20 +173,10 @@ main() {
         ..finales = [''];
       expect(divideByBlock(group), [[]]);
     });
-    // TODO(viiviii): 초성의 유효성 검사는 여기서 실행되지 않음
-    test('초성은 유효성 검사를 하지 않고 사용된다', () {
-      final group = Group.fromMedial('ㅗ')
-        ..initials = ['ㄲ', 's']
-        ..finales = ['ㅊ'];
-      expect(divideByBlock(group), [
-        ['ㄲ'],
-        ['s', 'ㅗ', 'ㅊ']
-      ]);
-    });
   });
 
   group('assemble', () {
-    test('[ㄲ, ㅗ, ㅊ] -> 꽃', () {
+    test('올바른 음절 형식인 경우 합친 하나의 음절을 리턴한다', () {
       expect(assemble(['ㄲ', 'ㅗ', 'ㅊ']), '꽃');
     });
     test('종성이 없는 경우 연결된 문자열을 리턴한다', () {
@@ -193,7 +194,6 @@ main() {
       expect(block.medial, 'ㅗ');
       expect(block.finale, 'ㅊ');
     });
-    // TODO(viiviii)
     test('중성이 2글자 이상이어도 2글자만 중성으로 분리된다', () {
       final block = createSyllableFormByMedial(['ㅇ', 'ㅜ', 'ㅣ', 'ㅜ', 'ㅣ']);
       expect(block.initial, 'ㅇ');
@@ -203,7 +203,7 @@ main() {
   });
 
   group('Composition', () {
-    test('ㄲㅗㅊ -> 꽃', () {
+    test('올바른 음절 형식인경우 toSyllable()는 하나의 한글 음절을 리턴한다', () {
       final form = SyllableForm('ㄲ', 'ㅗ', 'ㅊ');
       expect(Composition.from(form).toSyllable(), '꽃');
     });
@@ -215,11 +215,6 @@ main() {
       final form = SyllableForm('ㄹ', 'ㄹ', 'ㅇ');
       expect(Composition.from(form).isValid, false);
     });
-
-    // TODO(viiviii)
-    // 1. 유효하지 않는 종성일 경우 의도치 않게 동작
-    // 2. 초성, 중성, 종성에서 MIXED를 사용하여 복합 자모를 한번 더 합침
-    // 3. 이때 MIXED는 중성+종성 복합 자모이므로 초성이 빠져있어 (ㅃ, ㄸ, ..)는 제외됨
     test('종성은 isValid에서 유효성 검사를 하지 않는다', () {
       final form = SyllableForm('ㄹ', 'ㅗ', 'ㅗ');
       expect(Composition.from(form).isValid, isNot(false));

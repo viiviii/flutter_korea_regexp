@@ -98,38 +98,37 @@ List<List<String>> divideByHangulBlocks(Group group) {
   return blocks;
 }
 
-String assemble(List<String> arr) {
-  if (!arr.any(_isMedial)) {
-    return arr.join();
+String assemble(List<String> blocks) {
+  if (!blocks.any(_isMedial)) {
+    return blocks.join();
   }
 
-  final block = divide(arr);
+  final block = createBlockByMedial(blocks);
 
   // TODO(viiviii)
   final offsets =
       SyllableOffsets.from(block.initial, block.medial, block.finale);
 
   if (!offsets.isValid) {
-    return arr.join();
+    return blocks.join();
   }
 
   return offsets.toSyllable();
 }
 
-// TODO(viiviii): 유효성 검증 로직 한곳으로
-// 모음(최대 2개)를 기준으로 블럭 단위에서 초성, 중성, 종성 글자를 나눈다
-// 특이사항 -> 중성이 3글자여도 2글자만 중성으로 감
-Block divide(List<String> arr) {
-  final startMedialIndex = arr.indexWhere(_isMedial);
-  final isMedialNext = startMedialIndex != arr.length - 1 &&
-      _isMedial(arr[startMedialIndex + 1]);
-  final endMedialIndex = isMedialNext ? startMedialIndex + 1 : startMedialIndex;
-  final finaleIndex = endMedialIndex + 1;
+// TODO(viiviii): 유효성 검증 로직 한곳으로, 중복된 기능
+/// 중성(최대 2개)을 기준으로 초성, 중성, 종성을 분리한다
+Block createBlockByMedial(List<String> block) {
+  assert(block.any(_isMedial));
+  final medialIndex = block.indexWhere(_isMedial);
+  final isMedialNext =
+      medialIndex != block.length - 1 && _isMedial(block[medialIndex + 1]);
+  final nextMedialIndex = isMedialNext ? medialIndex + 1 : medialIndex;
+  final finaleIndex = nextMedialIndex + 1;
 
-  final initial = arr.sublist(0, startMedialIndex).join();
-  final medial = arr.sublist(startMedialIndex, finaleIndex).join();
-  final finale = arr.sublist(finaleIndex).join();
-
+  final initial = block.sublist(0, medialIndex).join();
+  final medial = block.sublist(medialIndex, finaleIndex).join();
+  final finale = block.sublist(finaleIndex).join();
   return Block(initial, medial, finale);
 }
 

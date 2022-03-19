@@ -189,16 +189,16 @@ main() {
     });
   });
 
-  group('divide', () {
+  group('createBlockByMedial', () {
     test('올바른 음절 블럭에서 초성, 중성, 종성을 분리한다', () {
-      final block = divide(['ㄲ', 'ㅗ', 'ㅊ']);
+      final block = createBlockByMedial(['ㄲ', 'ㅗ', 'ㅊ']);
       expect(block.initial, 'ㄲ');
       expect(block.medial, 'ㅗ');
       expect(block.finale, 'ㅊ');
     });
     // TODO(viiviii)
     test('중성이 2글자 이상이어도 2글자만 중성으로 분리된다', () {
-      final block = divide(['ㅇ', 'ㅜ', 'ㅣ', 'ㅜ', 'ㅣ']);
+      final block = createBlockByMedial(['ㅇ', 'ㅜ', 'ㅣ', 'ㅜ', 'ㅣ']);
       expect(block.initial, 'ㅇ');
       expect(block.medial, 'ㅜㅣ');
       expect(block.finale, 'ㅜㅣ');

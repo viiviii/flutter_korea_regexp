@@ -14,9 +14,10 @@ String implode(String input) {
   final items2 = mixFinaleAndReplaceTheRemainingFinalesToInitials(items);
 
   /// 각 글자에 해당하는 블록 단위로 나눈다.
-  final List<List<String>> items4 = divideByHangulBlock(items2);
+  final blocks = items2.fold<List<List<String>>>(
+      [], (acc, group) => acc..addAll(divideByHangulBlocks(group)));
 
-  return items4.map(assemble).join();
+  return blocks.map(assemble).join();
 }
 
 /// 인접한 모음을 하나의 복합 모음으로 합친다.
@@ -78,24 +79,23 @@ List<Group> mixFinaleAndReplaceTheRemainingFinalesToInitials(
 }
 
 /// 각 글자에 해당하는 블록 단위로 나눈다.
-List<List<String>> divideByHangulBlock(List<Group> groups) {
-  final List<List<String>> result = [];
-  groups.forEach((e) {
-    final List<String> pre = List.of(e.initials);
-    final String initial = pre.isNotEmpty ? pre.removeLast() : '';
+List<List<String>> divideByHangulBlocks(Group group) {
+  final pre = List.of(group.initials);
+  final initial = pre.isNotEmpty ? pre.removeLast() : '';
 
-    List<String> post = e.finales;
-    String finale = '';
-    if (post.isNotEmpty && _isFinale(post.first)) {
-      finale = post.first;
-      post = post.skip(1).toList();
-    }
+  var post = group.finales;
+  var finale = '';
+  if (post.isNotEmpty && _isFinale(post.first)) {
+    finale = post.first;
+    post = post.skip(1).toList();
+  }
 
-    pre.where((e) => e.isNotEmpty).forEach((e) => result.add([e]));
-    result.add([initial, e.medial, finale].where((e) => e.isNotEmpty).toList());
-    post.where((e) => e.isNotEmpty).forEach((e) => result.add([e]));
-  });
-  return result;
+  final blocks = <List<String>>[];
+  blocks.addAll(pre.where((e) => e.isNotEmpty).map((e) => [e]).toList());
+  blocks
+      .add([initial, group.medial, finale].where((e) => e.isNotEmpty).toList());
+  blocks.addAll(post.where((e) => e.isNotEmpty).map((e) => [e]).toList());
+  return blocks;
 }
 
 String assemble(List<String> arr) {

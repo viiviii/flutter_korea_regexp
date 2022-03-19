@@ -121,38 +121,38 @@ main() {
     expect(currentActual.initials, [previousFinales.last]);
   });
 
-  group('divideByHangulBlock', () {
+  group('divideByHangulBlocks', () {
     test('[ㄲ], ㅗ, [ㅊ] -> [ㄲ, ㅗ, ㅊ]', () {
       final group = Group.of(['ㄲ'], 'ㅗ', ['ㅊ']);
-      expect(divideByHangulBlock([group]), [
+      expect(divideByHangulBlocks(group), [
         ['ㄲ', 'ㅗ', 'ㅊ']
       ]);
     });
     test('빈 값인 경우 값이 추가되지 않는다', () {
       final group = Group.empty();
-      expect(divideByHangulBlock([group]), [[]]);
+      expect(divideByHangulBlocks(group), [[]]);
     });
     test('빈 문자열인 경우 값이 추가되지 않는다', () {
       final group = Group.from(initials: [''], finales: ['']);
-      expect(divideByHangulBlock([group]), [[]]);
+      expect(divideByHangulBlocks(group), [[]]);
     });
-    test('initials의 마지막 글자는 초성으로 나머지는 분리된다', () {
+    test('`initials`의 마지막 글자는 초성으로 나머지는 분리된다', () {
       final group = Group.of(['ㅇ', 'ㄲ'], 'ㅗ', ['ㅊ']);
-      expect(divideByHangulBlock([group]), [
+      expect(divideByHangulBlocks(group), [
         ['ㅇ'],
         ['ㄲ', 'ㅗ', 'ㅊ']
       ]);
     });
-    test('finales의 첫번째 글자는 종성으로 나머지는 분리된다', () {
+    test('`finales`의 첫번째 글자는 종성으로 나머지는 분리된다', () {
       final group = Group.of(['ㄲ'], 'ㅗ', ['ㅊ', 'ㅇ']);
-      expect(divideByHangulBlock([group]), [
+      expect(divideByHangulBlocks(group), [
         ['ㄲ', 'ㅗ', 'ㅊ'],
         ['ㅇ']
       ]);
     });
-    test('finales의 첫번째 글자가 올바른 종성이 아니면 모두 분리된다', () {
+    test('`finales`의 첫번째 글자가 올바른 종성이 아니면 모두 분리된다', () {
       final group = Group.of(['ㄲ'], 'ㅗ', ['s', 'ㅊ']);
-      expect(divideByHangulBlock([group]), [
+      expect(divideByHangulBlocks(group), [
         ['ㄲ', 'ㅗ'],
         ['s'],
         ['ㅊ']
@@ -161,7 +161,7 @@ main() {
     // TODO(viiviii): 초성의 유효성 검사는 여기서 실행되지 않음
     test('초성은 유효성 검사를 하지 않는다', () {
       final group = Group.of(['ㄲ', 's'], 'ㅗ', ['ㅊ']);
-      expect(divideByHangulBlock([group]), [
+      expect(divideByHangulBlocks(group), [
         ['ㄲ'],
         ['s', 'ㅗ', 'ㅊ']
       ]);

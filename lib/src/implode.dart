@@ -2,26 +2,25 @@ import 'package:korea_regexp/src/constant.dart';
 
 final complexDict = MIXED.map((k, v) => MapEntry(v.join(), k));
 
-// TODO(viiviii): 변수명
 String implode(String input) {
   /// 인접한 모음을 하나의 복합 모음으로 합친다.
   final chars = mixMedial(input.split(''));
 
   /// 모음으로 시작하는 그룹들을 만든다.
-  final items = createGroupsByMedial(chars);
+  final createdGroups = createGroupsByMedial(chars);
 
   /// 각 그룹을 순회하면서 복합자음을 정리하고, 앞 그룹에서 종성으로 사용하고 남은 자음들을 초성으로 가져온다.
-  final items2 = mixFinaleAndReplaceTheRemainingFinalesToInitials(items);
+  final groups =
+      mixFinaleAndReplaceTheRemainingFinalesToInitials(createdGroups);
 
   /// 각 글자에 해당하는 블록 단위로 나눈다.
-  final blocks = items2.fold<List<List<String>>>(
+  final blocks = groups.fold<List<List<String>>>(
       [], (acc, group) => acc..addAll(divideByHangulBlocks(group)));
 
   return blocks.map(assemble).join();
 }
 
 /// 인접한 모음을 하나의 복합 모음으로 합친다.
-// TODO(viiviii): MIXED 상수를 자음, 모음 분리해서 바로 찾는게 좋지 않을까?
 List<String> mixMedial(List<String> inputs) {
   final chars = [inputs.first];
   inputs.forEachFromNext((previous, current) {
@@ -91,10 +90,10 @@ List<List<String>> divideByHangulBlocks(Group group) {
   }
 
   final blocks = <List<String>>[];
-  blocks.addAll(pre.where((e) => e.isNotEmpty).map((e) => [e]).toList());
+  blocks.addAll(pre.where((e) => e.isNotEmpty).map((e) => [e]));
   blocks
       .add([initial, group.medial, finale].where((e) => e.isNotEmpty).toList());
-  blocks.addAll(post.where((e) => e.isNotEmpty).map((e) => [e]).toList());
+  blocks.addAll(post.where((e) => e.isNotEmpty).map((e) => [e]));
   return blocks;
 }
 
@@ -111,7 +110,6 @@ String assemble(List<String> block) {
   return composition.toSyllable();
 }
 
-// TODO(viiviii): 유효성 검증 로직 한곳으로, 중복된 기능
 /// 중성(최대 2개)을 기준으로 초성, 중성, 종성을 분리한다
 SyllableForm createSyllableFormByMedial(List<String> block) {
   assert(block.any(_isMedial));
@@ -159,14 +157,15 @@ class SyllableForm {
   final String medial;
   final String finale;
 
-  SyllableForm(this.initial, this.medial, this.finale);
+  const SyllableForm(this.initial, this.medial, this.finale);
+
+  @override
+  String toString() => '$runtimeType($initial, $medial, $finale)';
 }
 
 /// 올바른 초성, 중성, 종성일 경우 하나의 한글 음절을 구할 수 있다.
 ///
-/// 자모는 [INITIALS], [MEDIALS], [FINALES] 리스트에 알고리즘적으로 매핑되어 있다.
-/// 이 클래스의 필드 값은 이 상수 리스트에서 얻은 값이며 한글 음절을 구하는 계산식에 사용된다.
-///
+/// 계산식에 필요한 값은 [INITIALS], [MEDIALS], [FINALES] 리스트에 알고리즘적으로 매핑되어 있다.
 /// for Example,
 /// ```dart
 /// var composition = Composition('ㅎ', 'ㅏ', 'ㄴ');
@@ -191,13 +190,15 @@ class Composition {
 
   String toSyllable() => String.fromCharCode(_syllableCharCode());
 
-  /// 필드 값으로 하나의 한글 음절 유니코드 코드포인트를 구한다.
   int _syllableCharCode() {
     return BASE +
         initial * (MEDIALS.length * FINALES.length) +
         medial * FINALES.length +
         finale;
   }
+
+  @override
+  String toString() => '$runtimeType($initial, $medial, $finale)';
 }
 
 extension _<E> on List<E> {

@@ -98,27 +98,22 @@ List<List<String>> divideByHangulBlocks(Group group) {
   return blocks;
 }
 
-String assemble(List<String> blocks) {
-  if (!blocks.any(_isMedial)) {
-    return blocks.join();
+/// 올바른 음절 형식일 경우 합치고, 아닌 경우 문자열을 연결하여 리턴한다.
+String assemble(List<String> block) {
+  if (!block.any(_isMedial)) {
+    return block.join();
   }
-
-  final block = createBlockByMedial(blocks);
-
-  // TODO(viiviii)
-  final offsets =
-      SyllableOffsets.from(block.initial, block.medial, block.finale);
-
-  if (!offsets.isValid) {
-    return blocks.join();
+  final syllableForm = createSyllableFormByMedial(block);
+  final composition = Composition.from(syllableForm);
+  if (!composition.isValid) {
+    return block.join();
   }
-
-  return offsets.toSyllable();
+  return composition.toSyllable();
 }
 
 // TODO(viiviii): 유효성 검증 로직 한곳으로, 중복된 기능
 /// 중성(최대 2개)을 기준으로 초성, 중성, 종성을 분리한다
-Block createBlockByMedial(List<String> block) {
+SyllableForm createSyllableFormByMedial(List<String> block) {
   assert(block.any(_isMedial));
   final medialIndex = block.indexWhere(_isMedial);
   final isMedialNext =
@@ -129,7 +124,7 @@ Block createBlockByMedial(List<String> block) {
   final initial = block.sublist(0, medialIndex).join();
   final medial = block.sublist(medialIndex, finaleIndex).join();
   final finale = block.sublist(finaleIndex).join();
-  return Block(initial, medial, finale);
+  return SyllableForm(initial, medial, finale);
 }
 
 /// 해당 글자가 중성인지
@@ -159,12 +154,12 @@ class Group {
   String toString() => '$runtimeType($initials, $medial, $finales)';
 }
 
-class Block {
+class SyllableForm {
   final String initial;
   final String medial;
   final String finale;
 
-  Block(this.initial, this.medial, this.finale);
+  SyllableForm(this.initial, this.medial, this.finale);
 }
 
 /// 올바른 초성, 중성, 종성일 경우 하나의 한글 음절을 구할 수 있다.
@@ -174,27 +169,30 @@ class Block {
 ///
 /// for Example,
 /// ```dart
-/// var offsets = SyllableOffsets('ㅎ', 'ㅏ', 'ㄴ');
-/// var syllable = offset.toSyllable(); // 한
+/// var composition = Composition('ㅎ', 'ㅏ', 'ㄴ');
+/// var syllable = composition.toSyllable(); // 한
 /// ```
 /// 내부적으로 다음과 같이 계산된다.
 /// - 한 = ㅎ(18), ㅏ(0), ㄴ(4) = 44032 + [18 × 588 + 0 × 28 + 4] = 54620
-class SyllableOffsets {
+class Composition {
   final int initial;
   final int medial;
   final int finale;
 
-  SyllableOffsets.from(String initial, String medial, String finale)
+  Composition.from(SyllableForm syllableForm)
+      : this._(syllableForm.initial, syllableForm.medial, syllableForm.finale);
+
+  Composition._(String initial, String medial, String finale)
       : initial = INITIALS.indexOf(complexDict[initial] ?? initial),
         medial = MEDIALS.indexOf(complexDict[medial] ?? medial),
         finale = FINALES.indexOf(complexDict[finale] ?? finale);
 
   bool get isValid => initial != -1 && medial != -1;
 
-  String toSyllable() => String.fromCharCode(_compositionCharCode());
+  String toSyllable() => String.fromCharCode(_syllableCharCode());
 
   /// 필드 값으로 하나의 한글 음절 유니코드 코드포인트를 구한다.
-  int _compositionCharCode() {
+  int _syllableCharCode() {
     return BASE +
         initial * (MEDIALS.length * FINALES.length) +
         medial * FINALES.length +

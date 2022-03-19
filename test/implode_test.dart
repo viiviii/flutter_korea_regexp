@@ -175,71 +175,64 @@ main() {
     test('종성이 없는 경우 연결된 문자열을 리턴한다', () {
       expect(assemble(['ㅇ', 'ㅇ', 'ㅇ']), 'ㅇㅇㅇ');
     });
-    test('유효한 형식이 아닌 경우 - 종성이 초성에 있음', () {
+    test('올바른 음절 형식이 아닌 경우 연결된 문자열을 리턴한다', () {
       expect(assemble(['ㄽ', 'ㅗ', 'ㅇ']), 'ㄽㅗㅇ');
-    });
-    test('유효한 형식이 아닌 경우 - 중성이 없음', () {
-      expect(assemble(['ㅇ', 'ㅇ', 'ㅇ']), 'ㅇㅇㅇ');
-    });
-
-    // TODO(viiviii): 왜죠
-    test('복합 자모인 경우', () {
-      expect(assemble(['ㅇ', 'ㅜ', 'ㅣ']), '위');
-      expect(assemble(['ㅇ', 'ㅗ', 'ㅏ']), '와');
     });
   });
 
-  group('createBlockByMedial', () {
-    test('올바른 음절 블럭에서 초성, 중성, 종성을 분리한다', () {
-      final block = createBlockByMedial(['ㄲ', 'ㅗ', 'ㅊ']);
+  group('createSyllableFormByMedial', () {
+    test('문자열에서 초성, 중성, 종성을 분리한다', () {
+      final block = createSyllableFormByMedial(['ㄲ', 'ㅗ', 'ㅊ']);
       expect(block.initial, 'ㄲ');
       expect(block.medial, 'ㅗ');
       expect(block.finale, 'ㅊ');
     });
     // TODO(viiviii)
     test('중성이 2글자 이상이어도 2글자만 중성으로 분리된다', () {
-      final block = createBlockByMedial(['ㅇ', 'ㅜ', 'ㅣ', 'ㅜ', 'ㅣ']);
+      final block = createSyllableFormByMedial(['ㅇ', 'ㅜ', 'ㅣ', 'ㅜ', 'ㅣ']);
       expect(block.initial, 'ㅇ');
       expect(block.medial, 'ㅜㅣ');
       expect(block.finale, 'ㅜㅣ');
     });
   });
 
-  group('SyllableOffsets', () {
+  group('Composition', () {
+    test('ㄲㅗㅊ -> 꽃', () {
+      final form = SyllableForm('ㄲ', 'ㅗ', 'ㅊ');
+      expect(Composition.from(form).toSyllable(), '꽃');
+    });
     test('초성이 유효하지 않으면 isValid는 false를 리턴한다', () {
-      final offsets = SyllableOffsets.from('ㄽ', 'ㅗ', 'ㅇ');
-      expect(offsets.isValid, false);
+      final form = SyllableForm('ㄽ', 'ㅗ', 'ㅇ');
+      expect(Composition.from(form).isValid, false);
     });
     test('중성이 유효하지 않으면 isValid는 false를 리턴한다', () {
-      final offsets = SyllableOffsets.from('ㄹ', 'ㄹ', 'ㅇ');
-      expect(offsets.isValid, false);
-    });
-    test('올바른 자모일 경우 한글 음절을 리턴한다', () {
-      final offsets = SyllableOffsets.from('ㄲ', 'ㅗ', 'ㅊ');
-      expect(offsets.toSyllable(), '꽃');
+      final form = SyllableForm('ㄹ', 'ㄹ', 'ㅇ');
+      expect(Composition.from(form).isValid, false);
     });
 
-    // TODO(viiviii): 1. 유효하지 않는 종성일 경우 의도치 않게 동작
-    // TODO(viiviii): 2. 초성, 중성, 종성에서 MIXED를 사용하여 복합 자모를 한번 더 합치는데 MIXED는 중성+종성 복합자모이므로 초성이 빠져있는 듯 함(ㅃ, ㄸ)
+    // TODO(viiviii)
+    // 1. 유효하지 않는 종성일 경우 의도치 않게 동작
+    // 2. 초성, 중성, 종성에서 MIXED를 사용하여 복합 자모를 한번 더 합침
+    // 3. 이때 MIXED는 중성+종성 복합 자모이므로 초성이 빠져있어 (ㅃ, ㄸ, ..)는 제외됨
     test('종성은 isValid에서 유효성 검사를 하지 않는다', () {
-      final offsets = SyllableOffsets.from('ㄹ', 'ㅗ', 'ㅗ');
-      expect(offsets.isValid, isNot(false));
+      final form = SyllableForm('ㄹ', 'ㅗ', 'ㅗ');
+      expect(Composition.from(form).isValid, isNot(false));
     });
     test('복합 초성를 한번 더 합친다', () {
-      final offsets = SyllableOffsets.from('ㄱㄱ', 'ㅗ', 'ㅊ');
-      expect(offsets.toSyllable(), '꽃');
+      final form = SyllableForm('ㄱㄱ', 'ㅗ', 'ㅊ');
+      expect(Composition.from(form).toSyllable(), '꽃');
     });
     test('복합 중성를 한번 더 합친다', () {
-      final offsets = SyllableOffsets.from('ㅇ', 'ㅜㅣ', '');
-      expect(offsets.toSyllable(), '위');
+      final form = SyllableForm('ㅇ', 'ㅜㅣ', '');
+      expect(Composition.from(form).toSyllable(), '위');
     });
     test('복합 종성를 한번 더 합친다', () {
-      final offsets = SyllableOffsets.from('ㅇ', 'ㅣ', 'ㅅㅅ');
-      expect(offsets.toSyllable(), '있');
+      final form = SyllableForm('ㅇ', 'ㅣ', 'ㅅㅅ');
+      expect(Composition.from(form).toSyllable(), '있');
     });
     test('하지만 초성에서 ㄸ, ㅃ와 같은 복합 자모는 합치지 못한다', () {
-      final offsets = SyllableOffsets.from('ㄷㄷ', 'ㅣ', '');
-      expect(offsets.toSyllable(), isNot('띠'));
+      final form = SyllableForm('ㄷㄷ', 'ㅣ', '');
+      expect(Composition.from(form).toSyllable(), isNot('띠'));
     });
   });
 }

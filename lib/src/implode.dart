@@ -40,7 +40,7 @@ List<Group> createGroupsByMedial(List<String> chars) {
   final items = [cursor];
   chars.forEach((e) {
     if (_isMedial(e)) {
-      cursor = Group.from(medial: e);
+      cursor = Group.fromMedial(e);
       items.add(cursor);
     } else {
       cursor.finales.add(e);
@@ -135,16 +135,13 @@ bool _isFinale(String? char) => FINALES.contains(char);
 String? _mix(String first, String last) => complexDict['$first$last'];
 
 class Group {
-  List<String> initials;
+  List<String> initials = [];
   final String medial;
-  List<String> finales;
+  List<String> finales = [];
 
-  Group.empty() : this.from();
+  Group.fromMedial(String medial) : medial = medial;
 
-  Group.from({List<String>? initials, String? medial, List<String>? finales})
-      : this.of(initials ?? [], medial ?? '', finales ?? []);
-
-  Group.of(this.initials, this.medial, this.finales);
+  Group.empty() : this.fromMedial('');
 
   bool get hasMedial => medial.isNotEmpty;
 
